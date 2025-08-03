@@ -1,5 +1,5 @@
 import { NetworkDevice, Connection } from '../../types/network';
-import { exportToSVG, exportToJSON } from '../exportUtils';
+import { exportToSVG, exportToJSON, exportToCSV } from '../exportUtils';
 
 // Mock html2canvas for PNG export tests
 jest.mock('html2canvas', () => {
@@ -20,7 +20,8 @@ Object.defineProperty(global, 'URL', {
 const mockLink = {
   download: '',
   href: '',
-  click: jest.fn()
+  click: jest.fn(),
+  parentNode: null
 };
 
 Object.defineProperty(document, 'createElement', {
@@ -35,6 +36,10 @@ Object.defineProperty(document, 'createElement', {
 describe('Export Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset mockLink properties
+    mockLink.download = '';
+    mockLink.href = '';
+    mockLink.parentNode = null;
   });
 
   describe('exportToSVG', () => {
@@ -95,6 +100,113 @@ describe('Export Utils', () => {
 
     test('handles empty devices and connections', () => {
       exportToSVG([], []);
+
+      expect(document.createElement).toHaveBeenCalledWith('a');
+      expect(mockLink.click).toHaveBeenCalled();
+    });
+  });
+
+  describe('exportToCSV', () => {
+    const mockDevices: NetworkDevice[] = [
+      {
+        id: 'device-1',
+        type: 'router',
+        name: 'Router 1',
+        position: { x: 100, y: 150 },
+        config: { ipAddress: '192.168.1.1', subnet: '255.255.255.0', vlan: '1' }
+      },
+      {
+        id: 'device-2',
+        type: 'switch',
+        name: 'Switch 1',
+        position: { x: 300, y: 250 },
+        config: { vlan: '10' }
+      }
+    ];
+
+    const mockConnections: Connection[] = [
+      {
+        id: 'conn-1',
+        source: 'device-1',
+        target: 'device-2',
+        type: 'ethernet',
+        label: 'Uplink',
+        sourcePort: 'Gi0/1',
+        targetPort: 'Gi0/24',
+        bandwidth: '1 Gbps'
+      }
+    ];
+
+    test('creates unified CSV file', () => {
+      exportToCSV(mockDevices, mockConnections);
+
+      expect(document.createElement).toHaveBeenCalledWith('a');
+      expect(mockLink.click).toHaveBeenCalled();
+      expect(mockLink.download).toMatch(/^network-diagram-\d{4}-\d{2}-\d{2}\.csv$/);
+    });
+
+    test('includes both devices and connections in single file', () => {
+      const originalBlob = global.Blob;
+      const mockBlobContent = jest.fn();
+      
+      global.Blob = jest.fn().mockImplementation((content) => {
+        mockBlobContent(content[0]);
+        return { type: 'text/csv' };
+      }) as any;
+
+      exportToCSV(mockDevices, mockConnections);
+
+      expect(mockBlobContent).toHaveBeenCalled();
+      const csvContent = mockBlobContent.mock.calls[0][0];
+      
+      // Check for metadata section
+      expect(csvContent).toContain('=== NETWORK DIAGRAM EXPORT ===');
+      expect(csvContent).toContain('Total Devices,2');
+      expect(csvContent).toContain('Total Connections,1');
+      
+      // Check for devices section
+      expect(csvContent).toContain('=== DEVICES ===');
+      expect(csvContent).toContain('Router 1');
+      expect(csvContent).toContain('192.168.1.1');
+      
+      // Check for connections section
+      expect(csvContent).toContain('=== CONNECTIONS ===');
+      expect(csvContent).toContain('Router 1');
+      expect(csvContent).toContain('Switch 1');
+      expect(csvContent).toContain('Uplink');
+
+      global.Blob = originalBlob;
+    });
+
+    test('escapes special CSV characters', () => {
+      const originalBlob = global.Blob;
+      const mockBlobContent = jest.fn();
+      
+      global.Blob = jest.fn().mockImplementation((content) => {
+        mockBlobContent(content[0]);
+        return { type: 'text/csv' };
+      }) as any;
+
+      const devicesWithSpecialChars: NetworkDevice[] = [
+        {
+          id: 'device-1',
+          type: 'router',
+          name: 'Router, "Main"',
+          position: { x: 100, y: 150 },
+          config: { ipAddress: '192.168.1.1' }
+        }
+      ];
+
+      exportToCSV(devicesWithSpecialChars, []);
+
+      const csvContent = mockBlobContent.mock.calls[0][0];
+      expect(csvContent).toContain('"Router, ""Main"""');
+
+      global.Blob = originalBlob;
+    });
+
+    test('handles empty data', () => {
+      exportToCSV([], []);
 
       expect(document.createElement).toHaveBeenCalledWith('a');
       expect(mockLink.click).toHaveBeenCalled();
