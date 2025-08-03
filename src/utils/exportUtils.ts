@@ -144,30 +144,55 @@ export const exportToSVG = (devices: NetworkDevice[], connections: Connection[],
 
 export const exportToCSV = (devices: NetworkDevice[], connections: Connection[]) => {
   try {
-    // Create devices CSV
+    // Helper function to escape CSV values
+    const escapeCSV = (value: any): string => {
+      const str = String(value || '');
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    // Create combined CSV with both devices and connections
+    const csvSections: string[] = [];
+    
+    // Add metadata section
+    csvSections.push('=== NETWORK DIAGRAM EXPORT ===');
+    csvSections.push(`Export Date,${new Date().toISOString()}`);
+    csvSections.push(`Total Devices,${devices.length}`);
+    csvSections.push(`Total Connections,${connections.length}`);
+    csvSections.push('');
+    
+    // Add devices section
+    csvSections.push('=== DEVICES ===');
     const deviceHeaders = ['ID', 'Name', 'Type', 'IP Address', 'Subnet', 'VLAN', 'Position X', 'Position Y'];
-    const deviceRows = devices.map(device => [
-      device.id,
-      device.name,
-      device.type,
-      device.config.ipAddress || '',
-      device.config.subnet || '',
-      device.config.vlan || '',
-      device.position.x,
-      device.position.y
-    ]);
+    csvSections.push(deviceHeaders.map(escapeCSV).join(','));
     
-    const devicesCSV = [
-      deviceHeaders.join(','),
-      ...deviceRows.map(row => row.join(','))
-    ].join('\n');
+    devices.forEach(device => {
+      const row = [
+        device.id,
+        device.name,
+        device.type,
+        device.config.ipAddress || '',
+        device.config.subnet || '',
+        device.config.vlan || '',
+        device.position.x,
+        device.position.y
+      ];
+      csvSections.push(row.map(escapeCSV).join(','));
+    });
     
-    // Create connections CSV
+    csvSections.push('');
+    
+    // Add connections section
+    csvSections.push('=== CONNECTIONS ===');
     const connectionHeaders = ['ID', 'Source Device', 'Target Device', 'Type', 'Label', 'Source Port', 'Target Port', 'Bandwidth'];
-    const connectionRows = connections.map(conn => {
+    csvSections.push(connectionHeaders.map(escapeCSV).join(','));
+    
+    connections.forEach(conn => {
       const sourceDevice = devices.find(d => d.id === conn.source);
       const targetDevice = devices.find(d => d.id === conn.target);
-      return [
+      const row = [
         conn.id,
         sourceDevice?.name || conn.source,
         targetDevice?.name || conn.target,
@@ -177,34 +202,25 @@ export const exportToCSV = (devices: NetworkDevice[], connections: Connection[])
         conn.targetPort || '',
         conn.bandwidth || ''
       ];
+      csvSections.push(row.map(escapeCSV).join(','));
     });
     
-    const connectionsCSV = [
-      connectionHeaders.join(','),
-      ...connectionRows.map(row => row.join(','))
-    ].join('\n');
+    // Create and download the unified CSV
+    const csvContent = csvSections.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `network-diagram-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
     
-    // Download devices CSV
-    const devicesBlob = new Blob([devicesCSV], { type: 'text/csv' });
-    const devicesUrl = URL.createObjectURL(devicesBlob);
-    const devicesLink = document.createElement('a');
-    devicesLink.href = devicesUrl;
-    devicesLink.download = 'network-devices.csv';
-    devicesLink.click();
-    
-    // Download connections CSV after a short delay
+    // Clean up
     setTimeout(() => {
-      const connectionsBlob = new Blob([connectionsCSV], { type: 'text/csv' });
-      const connectionsUrl = URL.createObjectURL(connectionsBlob);
-      const connectionsLink = document.createElement('a');
-      connectionsLink.href = connectionsUrl;
-      connectionsLink.download = 'network-connections.csv';
-      connectionsLink.click();
-      
-      // Clean up
-      URL.revokeObjectURL(devicesUrl);
-      URL.revokeObjectURL(connectionsUrl);
-    }, 500);
+      URL.revokeObjectURL(url);
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+    }, 100);
     
   } catch (error) {
     console.error('CSV Export Error:', error);
