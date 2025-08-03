@@ -172,6 +172,9 @@ const Canvas: React.FC = () => {
           fitView
           snapToGrid={gridEnabled}
           snapGrid={[gridSize, gridSize]}
+          deleteKeyCode={null}
+          multiSelectionKeyCode={null}
+          selectionKeyCode={null}
         >
           <Controls />
           <MiniMap />

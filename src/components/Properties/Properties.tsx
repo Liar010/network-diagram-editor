@@ -26,10 +26,17 @@ const Properties: React.FC = () => {
     selectDevice, 
     selectConnection,
     deleteDevice,
-    deleteConnection
+    deleteConnection,
+    devices
   } = useDiagramStore();
 
-  if (!selectedDevice && !selectedConnection) {
+  // Get the current device from devices array to ensure we have the latest data
+  const currentDevice = React.useMemo(() => {
+    if (!selectedDevice) return null;
+    return devices.find(d => d.id === selectedDevice.id) || selectedDevice;
+  }, [devices, selectedDevice]);
+
+  if (!currentDevice && !selectedConnection) {
     return (
       <Paper
         elevation={2}
@@ -52,16 +59,16 @@ const Properties: React.FC = () => {
   }
 
   const handleDeviceChange = (field: string, value: string) => {
-    if (selectedDevice) {
-      updateDevice(selectedDevice.id, {
-        config: { ...selectedDevice.config, [field]: value },
+    if (currentDevice) {
+      updateDevice(currentDevice.id, {
+        config: { ...currentDevice.config, [field]: value },
       });
     }
   };
 
   const handleNameChange = (value: string) => {
-    if (selectedDevice) {
-      updateDevice(selectedDevice.id, { name: value });
+    if (currentDevice) {
+      updateDevice(currentDevice.id, { name: value });
     }
   };
 
@@ -75,7 +82,7 @@ const Properties: React.FC = () => {
         backgroundColor: 'background.paper',
       }}
     >
-      {selectedDevice && (
+      {currentDevice && (
         <Box sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Device Properties</Typography>
@@ -87,16 +94,17 @@ const Properties: React.FC = () => {
           <TextField
             fullWidth
             label="Name"
-            value={selectedDevice.name}
+            value={currentDevice.name}
             onChange={(e) => handleNameChange(e.target.value)}
             margin="normal"
             size="small"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <TextField
             fullWidth
             label="Type"
-            value={selectedDevice.type}
+            value={currentDevice.type}
             margin="normal"
             size="small"
             disabled
@@ -111,31 +119,34 @@ const Properties: React.FC = () => {
           <TextField
             fullWidth
             label="IP Address"
-            value={selectedDevice.config.ipAddress || ''}
+            value={currentDevice.config.ipAddress || ''}
             onChange={(e) => handleDeviceChange('ipAddress', e.target.value)}
             margin="normal"
             size="small"
             placeholder="192.168.1.1"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <TextField
             fullWidth
             label="Subnet Mask"
-            value={selectedDevice.config.subnet || ''}
+            value={currentDevice.config.subnet || ''}
             onChange={(e) => handleDeviceChange('subnet', e.target.value)}
             margin="normal"
             size="small"
             placeholder="255.255.255.0"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <TextField
             fullWidth
             label="VLAN"
-            value={selectedDevice.config.vlan || ''}
+            value={currentDevice.config.vlan || ''}
             onChange={(e) => handleDeviceChange('vlan', e.target.value)}
             margin="normal"
             size="small"
             placeholder="10"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <Button
@@ -144,8 +155,8 @@ const Properties: React.FC = () => {
             color="error"
             sx={{ mt: 2 }}
             onClick={() => {
-              if (selectedDevice) {
-                deleteDevice(selectedDevice.id);
+              if (currentDevice) {
+                deleteDevice(currentDevice.id);
                 selectDevice(null);
               }
             }}
@@ -171,6 +182,7 @@ const Properties: React.FC = () => {
             onChange={(e) => updateConnection(selectedConnection.id, { label: e.target.value })}
             margin="normal"
             size="small"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <TextField
@@ -181,6 +193,7 @@ const Properties: React.FC = () => {
             margin="normal"
             size="small"
             placeholder="Gi0/1"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <TextField
@@ -191,6 +204,7 @@ const Properties: React.FC = () => {
             margin="normal"
             size="small"
             placeholder="Gi0/2"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <TextField
@@ -201,6 +215,7 @@ const Properties: React.FC = () => {
             margin="normal"
             size="small"
             placeholder="1 Gbps"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <Divider sx={{ my: 2 }} />
@@ -244,6 +259,7 @@ const Properties: React.FC = () => {
             margin="normal"
             size="small"
             type="color"
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <TextField
@@ -266,6 +282,7 @@ const Properties: React.FC = () => {
             size="small"
             type="number"
             inputProps={{ min: 1, max: 10 }}
+            onKeyDown={(e) => e.stopPropagation()}
           />
           
           <FormControlLabel
