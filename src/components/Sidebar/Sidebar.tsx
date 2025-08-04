@@ -50,7 +50,7 @@ const Sidebar: React.FC = () => {
         backgroundColor: 'background.paper',
       }}
     >
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 2, pr: 5 }}>
         <Typography variant="h6" gutterBottom>
           Network Devices
         </Typography>

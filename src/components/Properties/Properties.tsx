@@ -57,6 +57,7 @@ const Properties: React.FC = () => {
           overflow: 'auto',
           backgroundColor: 'background.paper',
           p: 2,
+          pr: 5,
         }}
       >
         <Typography variant="h6" gutterBottom>
@@ -95,7 +96,7 @@ const Properties: React.FC = () => {
     >
       {currentDevice && (
         <Box sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, pr: 3 }}>
             <Typography variant="h6">Device Properties</Typography>
             <IconButton size="small" onClick={() => selectDevice(null)}>
               <CloseIcon />
@@ -187,7 +188,7 @@ const Properties: React.FC = () => {
       
       {selectedConnection && (
         <Box sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, pr: 3 }}>
             <Typography variant="h6">Connection Properties</Typography>
             <IconButton size="small" onClick={() => selectConnection(null)}>
               <CloseIcon />
