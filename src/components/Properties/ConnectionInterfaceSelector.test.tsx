@@ -1,9 +1,9 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react';
-import Properties from './Properties';
+import React from 'react';
 import { useDiagramStore } from '../../store/diagramStore';
 import { NetworkDevice, Connection } from '../../types/network';
+import Properties from './Properties';
 
 // Mock the store
 jest.mock('../../store/diagramStore');

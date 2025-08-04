@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import { NetworkDevice, Connection, NetworkDiagram, DeviceGroup } from '../types/network';
 import { DiagramSnapshot, HistoryState } from '../types/history';
+import { NetworkDevice, Connection, NetworkDiagram, DeviceGroup } from '../types/network';
+import { pushToHistory, trimHistory } from '../utils/historyUtils';
 import { generateId } from '../utils/idGenerator';
 import { applyLayout, LayoutOptions } from '../utils/layoutUtils';
-import { pushToHistory, trimHistory } from '../utils/historyUtils';
 import { migrateDeviceToInterfaces, migrateConnectionToInterfaceIds } from '../utils/migrationUtils';
 
 interface DiagramState {

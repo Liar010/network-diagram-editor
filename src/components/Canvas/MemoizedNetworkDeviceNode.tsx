@@ -1,6 +1,6 @@
 import React from 'react';
-import NetworkDeviceNode from './NetworkDeviceNode';
 import { NetworkNodeData } from '../../types/reactflow';
+import NetworkDeviceNode from './NetworkDeviceNode';
 
 // Memoized version of NetworkDeviceNode for better performance
 const MemoizedNetworkDeviceNode = React.memo(

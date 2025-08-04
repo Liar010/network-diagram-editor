@@ -1,4 +1,3 @@
-import React, { useCallback, useRef, useMemo } from 'react';
 import { Box } from '@mui/material';
 import {
   ReactFlow,
@@ -8,19 +7,19 @@ import {
   useNodesState,
   useEdgesState,
   Connection,
-  ReactFlowProvider,
   ReactFlowInstance,
   BackgroundVariant,
 } from '@xyflow/react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { useDrop } from 'react-dnd';
 import '@xyflow/react/dist/style.css';
 import { useDiagramStore } from '../../store/diagramStore';
 import { DeviceType } from '../../types/network';
 import { NetworkNode, NetworkEdge } from '../../types/reactflow';
-import MemoizedNetworkDeviceNode from './MemoizedNetworkDeviceNode';
-import { getConnectionDisplayInfo, getConnectionStyleForLayer } from '../../utils/layerUtils';
 import { snapToGrid } from '../../utils/gridUtils';
+import { getConnectionDisplayInfo, getConnectionStyleForLayer } from '../../utils/layerUtils';
 import { createDeviceWithInterfaces } from '../../utils/migrationUtils';
+import MemoizedNetworkDeviceNode from './MemoizedNetworkDeviceNode';
 
 const Canvas: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -159,7 +158,6 @@ const Canvas: React.FC = () => {
         backgroundColor: isOver ? 'action.hover' : 'background.default',
       }}
     >
-      <ReactFlowProvider>
         <ReactFlow
           id="react-flow-canvas"
           nodes={nodes}
@@ -170,6 +168,10 @@ const Canvas: React.FC = () => {
           onInit={(instance) => {
             setReactFlowInstanceLocal(instance);
             setReactFlowInstance(instance);
+            // Force an initial update to ensure the instance is available
+            setTimeout(() => {
+              setReactFlowInstance(instance);
+            }, 100);
           }}
           onNodeDragStop={onNodeDragStop}
           onEdgeClick={onEdgeClick}
@@ -189,7 +191,6 @@ const Canvas: React.FC = () => {
             size={1} 
           />
         </ReactFlow>
-      </ReactFlowProvider>
     </Box>
   );
 };

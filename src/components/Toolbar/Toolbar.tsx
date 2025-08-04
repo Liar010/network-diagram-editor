@@ -4,9 +4,6 @@ import {
   Download as ExportIcon,
   Undo as UndoIcon,
   Redo as RedoIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
-  FitScreen as FitScreenIcon,
   GridOn as GridOnIcon,
   Delete as DeleteIcon,
   Image as ImageIcon,
@@ -36,8 +33,9 @@ import React, { useState } from 'react';
 import { useDiagramStore } from '../../store/diagramStore';
 import { exportToPNG, exportToSVG, exportToJSON, exportToCSV } from '../../utils/exportUtils';
 import AutoLayoutDialog from '../AutoLayout/AutoLayoutDialog';
-import Templates from '../Templates/Templates';
 import ExportPreviewDialog from '../ExportPreview/ExportPreviewDialog';
+import Templates from '../Templates/Templates';
+import ZoomControls from './ZoomControls';
 
 interface NotificationState {
   open: boolean;
@@ -46,7 +44,7 @@ interface NotificationState {
 }
 
 const Toolbar: React.FC = () => {
-  const { layer, setLayer, clearDiagram, devices, connections, undo, redo, canUndo, canRedo, gridEnabled, toggleGrid, reactFlowInstance } = useDiagramStore();
+  const { layer, setLayer, clearDiagram, devices, connections, undo, redo, canUndo, canRedo, gridEnabled, toggleGrid } = useDiagramStore();
   const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [autoLayoutOpen, setAutoLayoutOpen] = useState(false);
@@ -257,28 +255,12 @@ const Toolbar: React.FC = () => {
 
           <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 
-          <ButtonGroup size="small">
-            <Tooltip title="Zoom In">
-              <Button onClick={() => reactFlowInstance?.zoomIn()}>
-                <ZoomInIcon />
-              </Button>
-            </Tooltip>
-            <Tooltip title="Zoom Out">
-              <Button onClick={() => reactFlowInstance?.zoomOut()}>
-                <ZoomOutIcon />
-              </Button>
-            </Tooltip>
-            <Tooltip title="Fit to Screen">
-              <Button onClick={() => reactFlowInstance?.fitView()}>
-                <FitScreenIcon />
-              </Button>
-            </Tooltip>
-            <Tooltip title={gridEnabled ? "Disable Grid" : "Enable Grid"}>
-              <Button onClick={toggleGrid} variant={gridEnabled ? "contained" : "outlined"}>
-                <GridOnIcon />
-              </Button>
-            </Tooltip>
-          </ButtonGroup>
+          <ZoomControls />
+          <Tooltip title={gridEnabled ? "Disable Grid" : "Enable Grid"}>
+            <Button size="small" onClick={toggleGrid} variant={gridEnabled ? "contained" : "outlined"}>
+              <GridOnIcon />
+            </Button>
+          </Tooltip>
 
           <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 

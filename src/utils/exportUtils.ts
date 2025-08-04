@@ -203,7 +203,7 @@ export const exportToCSV = (devices: NetworkDevice[], connections: Connection[])
     
     // Add devices section
     csvSections.push('=== DEVICES ===');
-    const deviceHeaders = ['ID', 'Name', 'Type', 'IP Address', 'Subnet', 'VLAN', 'Position X', 'Position Y'];
+    const deviceHeaders = ['ID', 'Name', 'Type', 'Management IP', 'Hostname', 'Position X', 'Position Y'];
     csvSections.push(deviceHeaders.map(escapeCSV).join(','));
     
     devices.forEach(device => {
@@ -211,9 +211,8 @@ export const exportToCSV = (devices: NetworkDevice[], connections: Connection[])
         device.id,
         device.name,
         device.type,
-        device.config.ipAddress || '',
-        device.config.subnet || '',
-        device.config.vlan || '',
+        device.config.managementIp || '',
+        device.config.hostname || '',
         device.position.x,
         device.position.y
       ];
@@ -222,23 +221,72 @@ export const exportToCSV = (devices: NetworkDevice[], connections: Connection[])
     
     csvSections.push('');
     
-    // Add connections section
+    // Add interfaces section
+    csvSections.push('=== NETWORK INTERFACES ===');
+    const interfaceHeaders = ['Device ID', 'Device Name', 'Interface ID', 'Interface Name', 'Type', 'Status', 'IP Address', 'Subnet', 'VLANs', 'Mode', 'Speed', 'Description'];
+    csvSections.push(interfaceHeaders.map(escapeCSV).join(','));
+    
+    devices.forEach(device => {
+      if (device.interfaces && device.interfaces.length > 0) {
+        device.interfaces.forEach(iface => {
+          const row = [
+            device.id,
+            device.name,
+            iface.id,
+            iface.name,
+            iface.type,
+            iface.status,
+            iface.ipAddress || '',
+            iface.subnet || '',
+            iface.vlans ? iface.vlans.join(';') : '',
+            iface.mode || '',
+            iface.speed || '',
+            iface.description || ''
+          ];
+          csvSections.push(row.map(escapeCSV).join(','));
+        });
+      }
+    });
+    
+    csvSections.push('');
+    
+    // Add connections section with interface information
     csvSections.push('=== CONNECTIONS ===');
-    const connectionHeaders = ['ID', 'Source Device', 'Target Device', 'Type', 'Label', 'Source Port', 'Target Port', 'Bandwidth'];
+    const connectionHeaders = ['ID', 'Source Device', 'Source Interface', 'Target Device', 'Target Interface', 'Connection Type', 'Label', 'Bandwidth', 'Status'];
     csvSections.push(connectionHeaders.map(escapeCSV).join(','));
     
     connections.forEach(conn => {
       const sourceDevice = devices.find(d => d.id === conn.source);
       const targetDevice = devices.find(d => d.id === conn.target);
+      
+      // Get interface names
+      let sourceInterfaceName = conn.sourcePort || '';
+      let targetInterfaceName = conn.targetPort || '';
+      
+      if (conn.sourceInterfaceId && sourceDevice?.interfaces) {
+        const sourceInterface = sourceDevice.interfaces.find(i => i.id === conn.sourceInterfaceId);
+        if (sourceInterface) {
+          sourceInterfaceName = sourceInterface.name;
+        }
+      }
+      
+      if (conn.targetInterfaceId && targetDevice?.interfaces) {
+        const targetInterface = targetDevice.interfaces.find(i => i.id === conn.targetInterfaceId);
+        if (targetInterface) {
+          targetInterfaceName = targetInterface.name;
+        }
+      }
+      
       const row = [
         conn.id,
         sourceDevice?.name || conn.source,
+        sourceInterfaceName,
         targetDevice?.name || conn.target,
+        targetInterfaceName,
         conn.type,
         conn.label || '',
-        conn.sourcePort || '',
-        conn.targetPort || '',
-        conn.bandwidth || ''
+        conn.bandwidth || '',
+        conn.style?.animated ? 'Active' : 'Normal'
       ];
       csvSections.push(row.map(escapeCSV).join(','));
     });

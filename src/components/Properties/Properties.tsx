@@ -19,8 +19,8 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useDiagramStore } from '../../store/diagramStore';
-import InterfacesSection from './InterfacesSection';
 import { migrateDeviceToInterfaces } from '../../utils/migrationUtils';
+import InterfacesSection from './InterfacesSection';
 
 const Properties: React.FC = () => {
   const [expandedSection, setExpandedSection] = useState<string | false>('basic');

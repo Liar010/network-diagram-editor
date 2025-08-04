@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
-import { useDiagramStore } from '../diagramStore';
 import { Connection, ConnectionStyle } from '../../types/network';
+import { useDiagramStore } from '../diagramStore';
 
 describe('Connection Style Tests', () => {
   beforeEach(() => {

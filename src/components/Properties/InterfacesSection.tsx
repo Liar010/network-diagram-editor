@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+import {
+  ExpandMore as ExpandMoreIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Circle as CircleIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Typography,
@@ -16,12 +21,7 @@ import {
   Stack,
   Tooltip,
 } from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Circle as CircleIcon,
-} from '@mui/icons-material';
+import React, { useState } from 'react';
 import { NetworkDevice, NetworkInterface } from '../../types/network';
 import { generateId } from '../../utils/idGenerator';
 

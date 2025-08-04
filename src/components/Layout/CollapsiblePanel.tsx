@@ -1,9 +1,9 @@
-import React from 'react';
-import { Box, IconButton, Tooltip } from '@mui/material';
 import { 
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
+import { Box, IconButton, Tooltip } from '@mui/material';
+import React from 'react';
 
 interface CollapsiblePanelProps {
   children: React.ReactNode;
