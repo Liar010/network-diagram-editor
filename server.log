@@ -1,0 +1,469 @@
+
+> network-diagram@0.1.0 start
+> react-scripts start
+
+(node:163724) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:163724) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled successfully!
+
+You can now view network-diagram in the browser.
+
+  Local:            http://localhost:3001
+  On Your Network:  http://192.168.0.4:3001
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/store/diagramStore.ts
+  Line 3:1:     `../types/history` import should occur before import of `../types/network`           import/order
+  Line 6:1:     `../utils/historyUtils` import should occur before import of `../utils/idGenerator`  import/order
+  Line 415:29:  'name' is defined but never used. Allowed unused args must match /^_/u               @typescript-eslint/no-unused-vars
+  Line 416:25:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  Line 417:17:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  Line 418:22:  'deviceId' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+  Line 418:32:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  Line 419:27:  'deviceId' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+  Line 419:37:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/Canvas/Canvas.tsx
+  Line 1:1:     `react` import should occur after import of `@xyflow/react`                                import/order
+  Line 20:1:    `./MemoizedNetworkDeviceNode` import should occur after import of `../../utils/gridUtils`  import/order
+  Line 21:1:    `../../utils/layerUtils` import should occur after import of `../../utils/gridUtils`       import/order
+  Line 123:37:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+  Line 165:43:  Unexpected any. Specify a different type                                                   @typescript-eslint/no-explicit-any
+
+src/store/diagramStore.ts
+  Line 3:1:     `../types/history` import should occur before import of `../types/network`           import/order
+  Line 6:1:     `../utils/historyUtils` import should occur before import of `../utils/idGenerator`  import/order
+  Line 415:29:  'name' is defined but never used. Allowed unused args must match /^_/u               @typescript-eslint/no-unused-vars
+  Line 416:25:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  Line 417:17:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  Line 418:22:  'deviceId' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+  Line 418:32:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+  Line 419:27:  'deviceId' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+  Line 419:37:  'groupId' is defined but never used. Allowed unused args must match /^_/u            @typescript-eslint/no-unused-vars
+
+src/utils/exportUtils.ts
+  Line 148:31:  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+webpack compiled with 1 warning
+No issues found.

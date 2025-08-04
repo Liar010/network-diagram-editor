@@ -337,6 +337,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
       }
     });
     
+    // Clear clipboard after paste to prevent accumulation
     return {
       devices: [...state.devices, ...newDevices],
       connections: [...state.connections, ...newConnections],
@@ -344,6 +345,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
       selectedConnections: newConnections,
       selectedDevice: null,
       selectedConnection: null,
+      clipboard: null,
     };
   }),
   
