@@ -15,6 +15,7 @@ describe('Layout Utils', () => {
       type: 'router',
       name: 'Main Router',
       position: { x: 0, y: 0 },
+      interfaces: [],
       config: {}
     },
     {
@@ -22,6 +23,7 @@ describe('Layout Utils', () => {
       type: 'switch',
       name: 'Core Switch',
       position: { x: 0, y: 0 },
+      interfaces: [],
       config: {}
     },
     {
@@ -29,6 +31,7 @@ describe('Layout Utils', () => {
       type: 'server',
       name: 'Web Server',
       position: { x: 0, y: 0 },
+      interfaces: [],
       config: {}
     },
     {
@@ -36,6 +39,7 @@ describe('Layout Utils', () => {
       type: 'workstation',
       name: 'PC 1',
       position: { x: 0, y: 0 },
+      interfaces: [],
       config: {}
     }
   ];

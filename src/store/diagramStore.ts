@@ -4,6 +4,7 @@ import { DiagramSnapshot, HistoryState } from '../types/history';
 import { generateId } from '../utils/idGenerator';
 import { applyLayout, LayoutOptions } from '../utils/layoutUtils';
 import { pushToHistory, trimHistory } from '../utils/historyUtils';
+import { migrateDeviceToInterfaces, migrateConnectionToInterfaceIds } from '../utils/migrationUtils';
 
 interface DiagramState {
   currentDiagram: NetworkDiagram | null;
@@ -93,7 +94,12 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
   reactFlowInstance: null,
   
   addDevice: (device) => set((state) => {
-    const newDevices = [...state.devices, { ...device, id: generateId('device') }];
+    const newDevice: NetworkDevice = {
+      ...device,
+      id: generateId('device'),
+      interfaces: device.interfaces || []
+    };
+    const newDevices = [...state.devices, newDevice];
     return {
       devices: newDevices,
       history: trimHistory(pushToHistory(state.history, state.devices, state.connections))
@@ -188,17 +194,31 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
     selectedGroup: null,
   }),
   
-  loadDiagram: (diagram) => set({
-    currentDiagram: diagram,
-    devices: diagram.devices,
-    connections: diagram.connections,
-    groups: diagram.groups || [],
-    layer: diagram.layer,
-    selectedDevice: null,
-    selectedConnection: null,
-    selectedDevices: [],
-    selectedConnections: [],
-    selectedGroup: null,
+  loadDiagram: (diagram) => set((state) => {
+    // Migrate devices to include interfaces
+    const migratedDevices = diagram.devices.map(device => 
+      device.interfaces && Array.isArray(device.interfaces) 
+        ? device 
+        : migrateDeviceToInterfaces(device)
+    );
+    
+    // Migrate connections to use interface IDs
+    const migratedConnections = diagram.connections.map(conn =>
+      migrateConnectionToInterfaceIds(conn, migratedDevices)
+    );
+    
+    return {
+      currentDiagram: diagram,
+      devices: migratedDevices,
+      connections: migratedConnections,
+      groups: diagram.groups || [],
+      layer: diagram.layer,
+      selectedDevice: null,
+      selectedConnection: null,
+      selectedDevices: [],
+      selectedConnections: [],
+      selectedGroup: null,
+    };
   }),
   
   autoLayout: (options) => set((state) => {
@@ -321,7 +341,13 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
         position: {
           x: device.position.x + offset.x,
           y: device.position.y + offset.y
-        }
+        },
+        // インターフェースをコピーし、接続情報をクリア
+        interfaces: device.interfaces.map(intf => ({
+          ...intf,
+          id: generateId('intf'),
+          connectedTo: undefined
+        }))
       });
     });
     

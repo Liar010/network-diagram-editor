@@ -1,4 +1,4 @@
-import { Close as CloseIcon } from '@mui/icons-material';
+import { Close as CloseIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import {
   Box,
   Paper,
@@ -13,11 +13,17 @@ import {
   InputLabel,
   Switch,
   FormControlLabel,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { useDiagramStore } from '../../store/diagramStore';
+import InterfacesSection from './InterfacesSection';
+import { migrateDeviceToInterfaces } from '../../utils/migrationUtils';
 
 const Properties: React.FC = () => {
+  const [expandedSection, setExpandedSection] = useState<string | false>('basic');
   const { 
     selectedDevice, 
     selectedConnection, 
@@ -33,7 +39,12 @@ const Properties: React.FC = () => {
   // Get the current device from devices array to ensure we have the latest data
   const currentDevice = React.useMemo(() => {
     if (!selectedDevice) return null;
-    return devices.find(d => d.id === selectedDevice.id) || selectedDevice;
+    const device = devices.find(d => d.id === selectedDevice.id) || selectedDevice;
+    // Migrate to new interface format if needed
+    if (!device.interfaces || !Array.isArray(device.interfaces)) {
+      return migrateDeviceToInterfaces(device);
+    }
+    return device;
   }, [devices, selectedDevice]);
 
   if (!currentDevice && !selectedConnection) {
@@ -112,42 +123,50 @@ const Properties: React.FC = () => {
           
           <Divider sx={{ my: 2 }} />
           
-          <Typography variant="subtitle2" gutterBottom>
-            Network Configuration
-          </Typography>
+          <Accordion 
+            expanded={expandedSection === 'basic'}
+            onChange={(_, isExpanded) => setExpandedSection(isExpanded ? 'basic' : false)}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle2">Basic Configuration</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <TextField
+                fullWidth
+                label="Hostname"
+                value={currentDevice.config.hostname || ''}
+                onChange={(e) => handleDeviceChange('hostname', e.target.value)}
+                margin="normal"
+                size="small"
+                onKeyDown={(e) => e.stopPropagation()}
+              />
+              <TextField
+                fullWidth
+                label="Management IP"
+                value={currentDevice.config.managementIp || ''}
+                onChange={(e) => handleDeviceChange('managementIp', e.target.value)}
+                margin="normal"
+                size="small"
+                placeholder="192.168.1.1"
+                onKeyDown={(e) => e.stopPropagation()}
+              />
+            </AccordionDetails>
+          </Accordion>
           
-          <TextField
-            fullWidth
-            label="IP Address"
-            value={currentDevice.config.ipAddress || ''}
-            onChange={(e) => handleDeviceChange('ipAddress', e.target.value)}
-            margin="normal"
-            size="small"
-            placeholder="192.168.1.1"
-            onKeyDown={(e) => e.stopPropagation()}
-          />
-          
-          <TextField
-            fullWidth
-            label="Subnet Mask"
-            value={currentDevice.config.subnet || ''}
-            onChange={(e) => handleDeviceChange('subnet', e.target.value)}
-            margin="normal"
-            size="small"
-            placeholder="255.255.255.0"
-            onKeyDown={(e) => e.stopPropagation()}
-          />
-          
-          <TextField
-            fullWidth
-            label="VLAN"
-            value={currentDevice.config.vlan || ''}
-            onChange={(e) => handleDeviceChange('vlan', e.target.value)}
-            margin="normal"
-            size="small"
-            placeholder="10"
-            onKeyDown={(e) => e.stopPropagation()}
-          />
+          <Accordion
+            expanded={expandedSection === 'interfaces'}
+            onChange={(_, isExpanded) => setExpandedSection(isExpanded ? 'interfaces' : false)}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle2">Network Interfaces</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <InterfacesSection
+                device={currentDevice}
+                onUpdateDevice={(updates) => updateDevice(currentDevice.id, updates)}
+              />
+            </AccordionDetails>
+          </Accordion>
           
           <Button
             fullWidth

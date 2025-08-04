@@ -29,6 +29,7 @@ describe('NetworkDeviceNode Component', () => {
     type: 'router',
     name: 'Test Router',
     position: { x: 100, y: 100 },
+    interfaces: [],
     config: {
       ipAddress: '192.168.1.1',
       subnet: '255.255.255.0',

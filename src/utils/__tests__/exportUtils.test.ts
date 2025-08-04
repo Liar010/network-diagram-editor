@@ -49,6 +49,7 @@ describe('Export Utils', () => {
         type: 'router',
         name: 'Router 1',
         position: { x: 100, y: 150 },
+        interfaces: [],
         config: { ipAddress: '192.168.1.1' }
       },
       {
@@ -56,6 +57,7 @@ describe('Export Utils', () => {
         type: 'switch',
         name: 'Switch 1',
         position: { x: 300, y: 250 },
+        interfaces: [],
         config: { vlan: '10' }
       }
     ];
@@ -113,6 +115,7 @@ describe('Export Utils', () => {
         type: 'router',
         name: 'Router 1',
         position: { x: 100, y: 150 },
+        interfaces: [],
         config: { ipAddress: '192.168.1.1', subnet: '255.255.255.0', vlan: '1' }
       },
       {
@@ -120,6 +123,7 @@ describe('Export Utils', () => {
         type: 'switch',
         name: 'Switch 1',
         position: { x: 300, y: 250 },
+        interfaces: [],
         config: { vlan: '10' }
       }
     ];
@@ -193,6 +197,7 @@ describe('Export Utils', () => {
           type: 'router',
           name: 'Router, "Main"',
           position: { x: 100, y: 150 },
+          interfaces: [],
           config: { ipAddress: '192.168.1.1' }
         }
       ];
@@ -220,6 +225,7 @@ describe('Export Utils', () => {
         type: 'router',
         name: 'Router 1',
         position: { x: 100, y: 150 },
+        interfaces: [],
         config: { ipAddress: '192.168.1.1' }
       }
     ];

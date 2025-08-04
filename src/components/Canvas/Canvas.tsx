@@ -20,6 +20,7 @@ import { NetworkNode, NetworkEdge } from '../../types/reactflow';
 import MemoizedNetworkDeviceNode from './MemoizedNetworkDeviceNode';
 import { getConnectionDisplayInfo, getConnectionStyleForLayer } from '../../utils/layerUtils';
 import { snapToGrid } from '../../utils/gridUtils';
+import { createDeviceWithInterfaces } from '../../utils/migrationUtils';
 
 const Canvas: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -106,12 +107,13 @@ const Canvas: React.FC = () => {
           position = snapToGrid(position, gridSize);
         }
 
-        addDevice({
+        const newDevice = createDeviceWithInterfaces({
           type: item.type,
           name: `${item.label} ${devices.length + 1}`,
           position,
           config: {},
         });
+        addDevice(newDevice);
       }
     },
     collect: (monitor) => ({

@@ -1,10 +1,11 @@
 import { NetworkDevice, Connection, NetworkDiagram } from '../types/network';
+import { createDeviceWithInterfaces } from '../utils/migrationUtils';
 
 export interface NetworkTemplate {
   id: string;
   name: string;
   description: string;
-  devices: Omit<NetworkDevice, 'id'>[];
+  devices: Omit<NetworkDevice, 'id' | 'interfaces'>[];
   connections: Omit<Connection, 'id' | 'source' | 'target'>[];
   connectionMap: Array<{ sourceIndex: number; targetIndex: number }>;
 }
@@ -208,10 +209,13 @@ export const networkTemplates: NetworkTemplate[] = [
 ];
 
 export const createDiagramFromTemplate = (template: NetworkTemplate): NetworkDiagram => {
-  const devices: NetworkDevice[] = template.devices.map((device, index) => ({
-    ...device,
-    id: `device-${Math.random().toString(36).substr(2, 9)}-${index}`
-  }));
+  const devices: NetworkDevice[] = template.devices.map((device, index) => {
+    const deviceWithInterfaces = createDeviceWithInterfaces(device);
+    return {
+      ...deviceWithInterfaces,
+      id: `device-${Math.random().toString(36).substr(2, 9)}-${index}`
+    } as NetworkDevice;
+  });
 
   const connections: Connection[] = template.connectionMap.map((conn, index) => ({
     id: `conn-${Math.random().toString(36).substr(2, 9)}-${index}`,
