@@ -10,11 +10,45 @@ export const exportToPNG = async (elementId: string, filename: string = 'network
       throw new Error(`Element with ID "${elementId}" not found. Make sure the diagram canvas is properly rendered.`);
     }
 
+    // Find the react-flow__viewport to capture the entire diagram
+    const viewport = element.querySelector('.react-flow__viewport') as HTMLElement;
+    if (!viewport) {
+      throw new Error('React Flow viewport not found');
+    }
+
+    // Get the bounding box of all elements to capture the entire diagram
+    const nodes = viewport.querySelectorAll('.react-flow__node');
+    
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    
+    // Calculate bounds from nodes
+    nodes.forEach(node => {
+      const rect = node.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      minX = Math.min(minX, rect.left - elementRect.left);
+      minY = Math.min(minY, rect.top - elementRect.top);
+      maxX = Math.max(maxX, rect.right - elementRect.left);
+      maxY = Math.max(maxY, rect.bottom - elementRect.top);
+    });
+
+    // Add padding
+    const padding = 50;
+    const width = maxX - minX + padding * 2;
+    const height = maxY - minY + padding * 2;
+
     const canvas = await html2canvas(element, {
       backgroundColor: '#ffffff',
       scale: 2,
       useCORS: true,
       allowTaint: false,
+      width: width,
+      height: height,
+      x: minX - padding,
+      y: minY - padding,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: width,
+      windowHeight: height,
     });
 
     if (!canvas) {
@@ -56,11 +90,13 @@ export const exportToSVG = (devices: NetworkDevice[], connections: Connection[],
       throw new Error('Filename must have .svg extension');
     }
 
-    // Calculate SVG dimensions based on device positions
-    let maxX = 800, maxY = 600;
+    // Calculate SVG dimensions based on device positions with padding
+    let minX = 0, minY = 0, maxX = 800, maxY = 600;
     if (devices.length > 0) {
-      maxX = Math.max(800, ...devices.map(d => d.position.x + 100));
-      maxY = Math.max(600, ...devices.map(d => d.position.y + 100));
+      minX = Math.min(0, ...devices.map(d => d.position.x - 50));
+      minY = Math.min(0, ...devices.map(d => d.position.y - 50));
+      maxX = Math.max(800, ...devices.map(d => d.position.x + 150));
+      maxY = Math.max(600, ...devices.map(d => d.position.y + 150));
     }
 
     // Create SVG content with error handling for device properties
@@ -98,6 +134,7 @@ export const exportToSVG = (devices: NetworkDevice[], connections: Connection[],
         const x2 = Number(targetDevice.position?.x) + 30 || 30;
         const y2 = Number(targetDevice.position?.y) + 30 || 30;
         
+        // Draw connections first so they appear behind devices
         return `
           <line 
             x1="${x1}" 
@@ -106,6 +143,7 @@ export const exportToSVG = (devices: NetworkDevice[], connections: Connection[],
             y2="${y2}" 
             stroke="#666" 
             stroke-width="2"
+            stroke-dasharray="${conn.type === 'wireless' ? '5,5' : '0'}"
           />
         `;
       } catch (error) {
@@ -115,10 +153,10 @@ export const exportToSVG = (devices: NetworkDevice[], connections: Connection[],
     }).join('');
 
     const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
-    <svg width="${maxX}" height="${maxY}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="white"/>
-      ${deviceElements}
+    <svg width="${maxX - minX}" height="${maxY - minY}" viewBox="${minX} ${minY} ${maxX - minX} ${maxY - minY}" xmlns="http://www.w3.org/2000/svg">
+      <rect x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" fill="white"/>
       ${connectionElements}
+      ${deviceElements}
     </svg>`;
 
     const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
