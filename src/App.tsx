@@ -1,5 +1,5 @@
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import Canvas from './components/Canvas/Canvas';
@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import Properties from './components/Properties/Properties';
 import Sidebar from './components/Sidebar/Sidebar';
 import Toolbar from './components/Toolbar/Toolbar';
+import CollapsiblePanel from './components/Layout/CollapsiblePanel';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 const theme = createTheme({
@@ -26,6 +27,8 @@ const theme = createTheme({
 
 function App() {
   useKeyboardShortcuts();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
   
   return (
     <ErrorBoundary>
@@ -38,7 +41,14 @@ function App() {
             </ErrorBoundary>
             <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
               <ErrorBoundary>
-                <Sidebar />
+                <CollapsiblePanel
+                  side="left"
+                  collapsed={sidebarCollapsed}
+                  onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  title="Device Library"
+                >
+                  <Sidebar />
+                </CollapsiblePanel>
               </ErrorBoundary>
               <Box sx={{ flex: 1, position: 'relative' }}>
                 <ErrorBoundary>
@@ -46,7 +56,15 @@ function App() {
                 </ErrorBoundary>
               </Box>
               <ErrorBoundary>
-                <Properties />
+                <CollapsiblePanel
+                  side="right"
+                  collapsed={propertiesCollapsed}
+                  onToggle={() => setPropertiesCollapsed(!propertiesCollapsed)}
+                  title="Properties"
+                  width={300}
+                >
+                  <Properties />
+                </CollapsiblePanel>
               </ErrorBoundary>
             </Box>
           </Box>

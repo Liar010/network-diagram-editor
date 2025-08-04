@@ -44,7 +44,7 @@ const Sidebar: React.FC = () => {
       aria-label="Network device palette"
       elevation={2}
       sx={{
-        width: 240,
+        width: '100%',
         height: '100%',
         overflow: 'auto',
         backgroundColor: 'background.paper',
