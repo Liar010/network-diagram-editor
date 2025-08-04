@@ -123,16 +123,50 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
   selectDevice: (device) => set({ selectedDevice: device, selectedConnection: null }),
   
   addConnection: (connection) => set((state) => {
-    const newConnections = [...state.connections, { 
+    // Find source and target devices
+    const sourceDevice = state.devices.find(d => d.id === connection.source);
+    const targetDevice = state.devices.find(d => d.id === connection.target);
+    
+    // Auto-select first available interface if not specified
+    let sourceInterfaceId = connection.sourceInterfaceId;
+    let targetInterfaceId = connection.targetInterfaceId;
+    let connectionType = connection.type || 'ethernet';
+    
+    if (!sourceInterfaceId && sourceDevice?.interfaces && sourceDevice.interfaces.length > 0) {
+      const firstInterface = sourceDevice.interfaces[0];
+      sourceInterfaceId = firstInterface.id;
+    }
+    
+    if (!targetInterfaceId && targetDevice?.interfaces && targetDevice.interfaces.length > 0) {
+      const firstInterface = targetDevice.interfaces[0];
+      targetInterfaceId = firstInterface.id;
+    }
+    
+    // If both interfaces are selected, set connection type based on interfaces
+    if (sourceInterfaceId && targetInterfaceId) {
+      const sourceInterface = sourceDevice?.interfaces?.find(i => i.id === sourceInterfaceId);
+      const targetInterface = targetDevice?.interfaces?.find(i => i.id === targetInterfaceId);
+      
+      if (sourceInterface && targetInterface && sourceInterface.type === targetInterface.type) {
+        connectionType = sourceInterface.type;
+      }
+    }
+    
+    const newConnection = { 
       ...connection, 
       id: generateId('conn'),
+      sourceInterfaceId,
+      targetInterfaceId,
+      type: connectionType,
       style: connection.style || {
         strokeStyle: 'solid',
         strokeColor: '#1976d2',
         strokeWidth: 2,
         animated: false
       }
-    }];
+    };
+    
+    const newConnections = [...state.connections, newConnection];
     return {
       connections: newConnections,
       history: trimHistory(pushToHistory(state.history, state.devices, state.connections))

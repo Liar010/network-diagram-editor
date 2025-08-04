@@ -47,6 +47,27 @@ const Properties: React.FC = () => {
     return device;
   }, [devices, selectedDevice]);
 
+  // Get source and target devices for the selected connection
+  const connectionDevices = React.useMemo(() => {
+    if (!selectedConnection) return null;
+    
+    const sourceDevice = devices.find(d => d.id === selectedConnection.source);
+    const targetDevice = devices.find(d => d.id === selectedConnection.target);
+    
+    // Ensure devices have interfaces
+    const migratedSource = sourceDevice && (!sourceDevice.interfaces || !Array.isArray(sourceDevice.interfaces)) 
+      ? migrateDeviceToInterfaces(sourceDevice) 
+      : sourceDevice;
+    const migratedTarget = targetDevice && (!targetDevice.interfaces || !Array.isArray(targetDevice.interfaces)) 
+      ? migrateDeviceToInterfaces(targetDevice) 
+      : targetDevice;
+    
+    return {
+      source: migratedSource,
+      target: migratedTarget
+    };
+  }, [devices, selectedConnection]);
+
   if (!currentDevice && !selectedConnection) {
     return (
       <Paper
@@ -205,26 +226,112 @@ const Properties: React.FC = () => {
             onKeyDown={(e) => e.stopPropagation()}
           />
           
-          <TextField
-            fullWidth
-            label="Source Port"
-            value={selectedConnection.sourcePort || ''}
-            onChange={(e) => updateConnection(selectedConnection.id, { sourcePort: e.target.value })}
-            margin="normal"
-            size="small"
-            placeholder="Gi0/1"
-            onKeyDown={(e) => e.stopPropagation()}
-          />
+          <FormControl fullWidth margin="normal" size="small">
+            <InputLabel>Source Interface</InputLabel>
+            <Select
+              value={selectedConnection.sourceInterfaceId || 
+                     (selectedConnection.sourcePort && connectionDevices?.source?.interfaces?.find(i => i.name === selectedConnection.sourcePort)?.id) || 
+                     ''}
+              onChange={(e) => {
+                const interfaceId = e.target.value;
+                const sourceInterface = connectionDevices?.source?.interfaces?.find(i => i.id === interfaceId);
+                const targetInterfaceId = selectedConnection.targetInterfaceId || 
+                  (selectedConnection.targetPort && connectionDevices?.target?.interfaces?.find(i => i.name === selectedConnection.targetPort)?.id);
+                const targetInterface = targetInterfaceId ? connectionDevices?.target?.interfaces?.find(i => i.id === targetInterfaceId) : null;
+                
+                // 両方のインターフェースが選択されている場合、接続タイプを自動設定
+                let connectionType = selectedConnection.type;
+                if (sourceInterface && targetInterface) {
+                  // 両方のインターフェースタイプが同じ場合はそのタイプを使用
+                  if (sourceInterface.type === targetInterface.type) {
+                    connectionType = sourceInterface.type;
+                  }
+                }
+                
+                updateConnection(selectedConnection.id, { 
+                  sourceInterfaceId: interfaceId,
+                  sourcePort: sourceInterface?.name || '', // 後方互換性のため
+                  type: connectionType
+                });
+              }}
+              label="Source Interface"
+            >
+              {connectionDevices?.source ? (
+                connectionDevices.source.interfaces?.map((iface) => (
+                  <MenuItem key={iface.id} value={iface.id}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography>{iface.name}</Typography>
+                      <Typography variant="caption" color={iface.status === 'up' ? 'success.main' : 'text.secondary'}>
+                        ({iface.status})
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="" disabled>
+                  <Typography variant="caption" color="text.secondary">No source device</Typography>
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl>
+          
+          <FormControl fullWidth margin="normal" size="small">
+            <InputLabel>Target Interface</InputLabel>
+            <Select
+              value={selectedConnection.targetInterfaceId || 
+                     (selectedConnection.targetPort && connectionDevices?.target?.interfaces?.find(i => i.name === selectedConnection.targetPort)?.id) || 
+                     ''}
+              onChange={(e) => {
+                const interfaceId = e.target.value;
+                const targetInterface = connectionDevices?.target?.interfaces?.find(i => i.id === interfaceId);
+                const sourceInterfaceId = selectedConnection.sourceInterfaceId || 
+                  (selectedConnection.sourcePort && connectionDevices?.source?.interfaces?.find(i => i.name === selectedConnection.sourcePort)?.id);
+                const sourceInterface = sourceInterfaceId ? connectionDevices?.source?.interfaces?.find(i => i.id === sourceInterfaceId) : null;
+                
+                // 両方のインターフェースが選択されている場合、接続タイプを自動設定
+                let connectionType = selectedConnection.type;
+                if (sourceInterface && targetInterface) {
+                  // 両方のインターフェースタイプが同じ場合はそのタイプを使用
+                  if (sourceInterface.type === targetInterface.type) {
+                    connectionType = targetInterface.type;
+                  }
+                }
+                
+                updateConnection(selectedConnection.id, { 
+                  targetInterfaceId: interfaceId,
+                  targetPort: targetInterface?.name || '', // 後方互換性のため
+                  type: connectionType
+                });
+              }}
+              label="Target Interface"
+            >
+              {connectionDevices?.target ? (
+                connectionDevices.target.interfaces?.map((iface) => (
+                  <MenuItem key={iface.id} value={iface.id}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography>{iface.name}</Typography>
+                      <Typography variant="caption" color={iface.status === 'up' ? 'success.main' : 'text.secondary'}>
+                        ({iface.status})
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="" disabled>
+                  <Typography variant="caption" color="text.secondary">No target device</Typography>
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl>
           
           <TextField
             fullWidth
-            label="Target Port"
-            value={selectedConnection.targetPort || ''}
-            onChange={(e) => updateConnection(selectedConnection.id, { targetPort: e.target.value })}
+            label="Connection Type"
+            value={selectedConnection.type}
             margin="normal"
             size="small"
-            placeholder="Gi0/2"
-            onKeyDown={(e) => e.stopPropagation()}
+            disabled
+            helperText="Automatically set based on selected interfaces"
           />
           
           <TextField
