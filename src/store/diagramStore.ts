@@ -20,6 +20,7 @@ interface DiagramState {
   layer: 'L1' | 'L2' | 'L3';
   gridEnabled: boolean;
   gridSize: number;
+  reactFlowInstance: any | null;
   
   addDevice: (device: Omit<NetworkDevice, 'id'>) => void;
   updateDevice: (id: string, device: Partial<NetworkDevice>) => void;
@@ -65,6 +66,9 @@ interface DiagramState {
   // Grid
   toggleGrid: () => void;
   setGridSize: (size: number) => void;
+  
+  // React Flow instance
+  setReactFlowInstance: (instance: any) => void;
 }
 
 export const useDiagramStore = create<DiagramState>((set, get) => ({
@@ -86,6 +90,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
   layer: 'L3',
   gridEnabled: true,
   gridSize: 20,
+  reactFlowInstance: null,
   
   addDevice: (device) => set((state) => {
     const newDevices = [...state.devices, { ...device, id: generateId('device') }];
@@ -421,4 +426,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
   // Grid
   toggleGrid: () => set((state) => ({ gridEnabled: !state.gridEnabled })),
   setGridSize: (size) => set({ gridSize: size }),
+  
+  // React Flow instance
+  setReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
 }));

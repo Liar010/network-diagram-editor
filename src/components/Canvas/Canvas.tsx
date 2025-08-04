@@ -23,10 +23,10 @@ import { snapToGrid } from '../../utils/gridUtils';
 
 const Canvas: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { devices, connections, addDevice, addConnection, updateDevice, selectConnection, layer, gridEnabled, gridSize } = useDiagramStore();
+  const { devices, connections, addDevice, addConnection, updateDevice, selectConnection, layer, gridEnabled, gridSize, setReactFlowInstance } = useDiagramStore();
   const [nodes, setNodes, onNodesChange] = useNodesState<NetworkNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<NetworkEdge>([]);
-  const [reactFlowInstance, setReactFlowInstance] = React.useState<ReactFlowInstance | null>(null);
+  const [reactFlowInstance, setReactFlowInstanceLocal] = React.useState<ReactFlowInstance<NetworkNode, NetworkEdge> | null>(null);
 
   // Memoize node types to prevent unnecessary re-renders
   const nodeTypes = useMemo(() => ({
@@ -165,7 +165,10 @@ const Canvas: React.FC = () => {
           onNodesChange={onNodesChange as any}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onInit={setReactFlowInstance}
+          onInit={(instance) => {
+            setReactFlowInstanceLocal(instance);
+            setReactFlowInstance(instance);
+          }}
           onNodeDragStop={onNodeDragStop}
           onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}

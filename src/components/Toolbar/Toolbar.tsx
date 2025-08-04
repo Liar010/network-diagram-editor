@@ -46,7 +46,7 @@ interface NotificationState {
 }
 
 const Toolbar: React.FC = () => {
-  const { layer, setLayer, clearDiagram, devices, connections, undo, redo, canUndo, canRedo, gridEnabled, toggleGrid } = useDiagramStore();
+  const { layer, setLayer, clearDiagram, devices, connections, undo, redo, canUndo, canRedo, gridEnabled, toggleGrid, reactFlowInstance } = useDiagramStore();
   const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [autoLayoutOpen, setAutoLayoutOpen] = useState(false);
@@ -259,17 +259,17 @@ const Toolbar: React.FC = () => {
 
           <ButtonGroup size="small">
             <Tooltip title="Zoom In">
-              <Button>
+              <Button onClick={() => reactFlowInstance?.zoomIn()}>
                 <ZoomInIcon />
               </Button>
             </Tooltip>
             <Tooltip title="Zoom Out">
-              <Button>
+              <Button onClick={() => reactFlowInstance?.zoomOut()}>
                 <ZoomOutIcon />
               </Button>
             </Tooltip>
             <Tooltip title="Fit to Screen">
-              <Button>
+              <Button onClick={() => reactFlowInstance?.fitView()}>
                 <FitScreenIcon />
               </Button>
             </Tooltip>
