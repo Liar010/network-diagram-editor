@@ -4,6 +4,7 @@ import { NetworkDevice, Connection, NetworkDiagram, DeviceGroup } from '../types
 import { pushToHistory, trimHistory } from '../utils/historyUtils';
 import { generateId } from '../utils/idGenerator';
 import { applyLayout, LayoutOptions } from '../utils/layoutUtils';
+import { determineLinkStatus, getConnectionStyleFromLinkStatus, determineInterfaceStatus } from '../utils/linkStatusUtils';
 import { migrateDeviceToInterfaces, migrateConnectionToInterfaceIds } from '../utils/migrationUtils';
 
 interface DiagramState {
@@ -124,31 +125,63 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
   
   addConnection: (connection) => set((state) => {
     // Find source and target devices
-    const sourceDevice = state.devices.find(d => d.id === connection.source);
-    const targetDevice = state.devices.find(d => d.id === connection.target);
+    let sourceDevice = state.devices.find(d => d.id === connection.source);
+    let targetDevice = state.devices.find(d => d.id === connection.target);
     
-    // Auto-select first available interface if not specified
+    // Don't auto-select interfaces - default to None
     let sourceInterfaceId = connection.sourceInterfaceId;
     let targetInterfaceId = connection.targetInterfaceId;
     let connectionType = connection.type || 'ethernet';
     
-    if (!sourceInterfaceId && sourceDevice?.interfaces && sourceDevice.interfaces.length > 0) {
-      const firstInterface = sourceDevice.interfaces[0];
-      sourceInterfaceId = firstInterface.id;
-    }
+    let updatedDevices = [...state.devices];
+    let connectionStyle = connection.style || {
+      strokeStyle: 'solid',
+      strokeColor: '#1976d2',
+      strokeWidth: 2,
+      animated: false
+    };
     
-    if (!targetInterfaceId && targetDevice?.interfaces && targetDevice.interfaces.length > 0) {
-      const firstInterface = targetDevice.interfaces[0];
-      targetInterfaceId = firstInterface.id;
-    }
-    
-    // If both interfaces are selected, set connection type based on interfaces
-    if (sourceInterfaceId && targetInterfaceId) {
-      const sourceInterface = sourceDevice?.interfaces?.find(i => i.id === sourceInterfaceId);
-      const targetInterface = targetDevice?.interfaces?.find(i => i.id === targetInterfaceId);
+    // If both interfaces are selected, update their status and connection style
+    if (sourceInterfaceId && targetInterfaceId && sourceDevice && targetDevice) {
+      const sourceInterface = sourceDevice.interfaces?.find(i => i.id === sourceInterfaceId);
+      const targetInterface = targetDevice.interfaces?.find(i => i.id === targetInterfaceId);
       
-      if (sourceInterface && targetInterface && sourceInterface.type === targetInterface.type) {
-        connectionType = sourceInterface.type;
+      if (sourceInterface && targetInterface) {
+        // Set connection type based on interfaces
+        if (sourceInterface.type === targetInterface.type) {
+          connectionType = sourceInterface.type;
+        }
+        
+        // Determine interface statuses
+        const sourceStatus = determineInterfaceStatus(sourceInterface, targetInterface, true);
+        const targetStatus = determineInterfaceStatus(targetInterface, sourceInterface, true);
+        
+        // Update devices with new interface statuses (if not admin-down)
+        updatedDevices = updatedDevices.map(device => {
+          if (device.id === connection.source && sourceInterface.status !== 'admin-down') {
+            return {
+              ...device,
+              interfaces: device.interfaces.map(intf =>
+                intf.id === sourceInterfaceId ? { ...intf, status: sourceStatus } : intf
+              )
+            };
+          } else if (device.id === connection.target && targetInterface.status !== 'admin-down') {
+            return {
+              ...device,
+              interfaces: device.interfaces.map(intf =>
+                intf.id === targetInterfaceId ? { ...intf, status: targetStatus } : intf
+              )
+            };
+          }
+          return device;
+        });
+        
+        // Determine connection style based on link status
+        const linkStatus = determineLinkStatus(
+          { ...sourceInterface, status: sourceStatus },
+          { ...targetInterface, status: targetStatus }
+        );
+        connectionStyle = getConnectionStyleFromLinkStatus(linkStatus, connectionStyle);
       }
     }
     
@@ -158,22 +191,64 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
       sourceInterfaceId,
       targetInterfaceId,
       type: connectionType,
-      style: connection.style || {
-        strokeStyle: 'solid',
-        strokeColor: '#1976d2',
-        strokeWidth: 2,
-        animated: false
-      }
+      style: connectionStyle
     };
     
     const newConnections = [...state.connections, newConnection];
     return {
+      devices: updatedDevices,
       connections: newConnections,
       history: trimHistory(pushToHistory(state.history, state.devices, state.connections))
     };
   }),
   
   updateConnection: (id, connection) => set((state) => {
+    // Get the current connection to check for interface changes
+    const currentConnection = state.connections.find(c => c.id === id);
+    let updatedDevices = [...state.devices];
+    
+    if (currentConnection) {
+      // Handle source interface change
+      if (connection.sourceInterfaceId !== undefined && 
+          connection.sourceInterfaceId !== currentConnection.sourceInterfaceId) {
+        // Set old source interface to down
+        if (currentConnection.sourceInterfaceId) {
+          updatedDevices = updatedDevices.map(device => {
+            if (device.id === currentConnection.source) {
+              const updatedInterfaces = device.interfaces.map(intf => {
+                if (intf.id === currentConnection.sourceInterfaceId && intf.status !== 'admin-down') {
+                  return { ...intf, status: 'down' as const };
+                }
+                return intf;
+              });
+              return { ...device, interfaces: updatedInterfaces };
+            }
+            return device;
+          });
+        }
+      }
+      
+      // Handle target interface change
+      if (connection.targetInterfaceId !== undefined && 
+          connection.targetInterfaceId !== currentConnection.targetInterfaceId) {
+        // Set old target interface to down
+        if (currentConnection.targetInterfaceId) {
+          updatedDevices = updatedDevices.map(device => {
+            if (device.id === currentConnection.target) {
+              const updatedInterfaces = device.interfaces.map(intf => {
+                if (intf.id === currentConnection.targetInterfaceId && intf.status !== 'admin-down') {
+                  return { ...intf, status: 'down' as const };
+                }
+                return intf;
+              });
+              return { ...device, interfaces: updatedInterfaces };
+            }
+            return device;
+          });
+        }
+      }
+    }
+    
     const updatedConnections = state.connections.map((c) => {
       if (c.id === id) {
         // Handle style updates
@@ -200,12 +275,52 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
       : state.selectedConnection;
     
     return {
+      devices: updatedDevices,
       connections: updatedConnections,
       selectedConnection: updatedSelectedConnection
     };
   }),
   
   deleteConnection: (id) => set((state) => {
+    // 削除する接続を取得
+    const connectionToDelete = state.connections.find(c => c.id === id);
+    
+    if (connectionToDelete) {
+      // 接続されているインターフェースのステータスをDownに戻す（Admin Downでない限り）
+      const updatedDevices = state.devices.map(device => {
+        // ソースデバイスの場合
+        if (device.id === connectionToDelete.source && connectionToDelete.sourceInterfaceId) {
+          const updatedInterfaces = device.interfaces.map(intf => {
+            if (intf.id === connectionToDelete.sourceInterfaceId && intf.status !== 'admin-down') {
+              return { ...intf, status: 'down' as const };
+            }
+            return intf;
+          });
+          return { ...device, interfaces: updatedInterfaces };
+        }
+        
+        // ターゲットデバイスの場合
+        if (device.id === connectionToDelete.target && connectionToDelete.targetInterfaceId) {
+          const updatedInterfaces = device.interfaces.map(intf => {
+            if (intf.id === connectionToDelete.targetInterfaceId && intf.status !== 'admin-down') {
+              return { ...intf, status: 'down' as const };
+            }
+            return intf;
+          });
+          return { ...device, interfaces: updatedInterfaces };
+        }
+        
+        return device;
+      });
+      
+      const newConnections = state.connections.filter((c) => c.id !== id);
+      return {
+        devices: updatedDevices,
+        connections: newConnections,
+        history: trimHistory(pushToHistory(state.history, state.devices, state.connections))
+      };
+    }
+    
     const newConnections = state.connections.filter((c) => c.id !== id);
     return {
       connections: newConnections,

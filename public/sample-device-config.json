@@ -1,0 +1,227 @@
+{
+  "version": "1.0",
+  "deviceConfigs": {
+    "router": {
+      "config": {
+        "hostname": "CORE-RTR-01",
+        "managementIp": "10.0.0.1"
+      },
+      "interfaces": [
+        {
+          "name": "gi0/0",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "192.168.1.1",
+          "subnet": "255.255.255.0",
+          "description": "LAN Interface"
+        },
+        {
+          "name": "gi0/1",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "10.0.0.1",
+          "subnet": "255.255.255.252",
+          "description": "WAN Interface"
+        },
+        {
+          "name": "gi0/2",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "admin-down",
+          "mode": "routed",
+          "description": "Backup Interface"
+        }
+      ]
+    },
+    "switch": {
+      "config": {
+        "hostname": "SW-CORE-01",
+        "managementIp": "10.0.1.1"
+      },
+      "interfaces": [
+        {
+          "name": "gi1/0/1",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "trunk",
+          "vlans": [10, 20, 30],
+          "description": "Uplink to Router"
+        },
+        {
+          "name": "gi1/0/2",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "access",
+          "vlans": [10],
+          "description": "User VLAN 10"
+        },
+        {
+          "name": "gi1/0/3",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "access",
+          "vlans": [20],
+          "description": "Server VLAN 20"
+        },
+        {
+          "name": "gi1/0/24",
+          "type": "fiber",
+          "speed": "10000",
+          "status": "up",
+          "mode": "trunk",
+          "vlans": [10, 20, 30, 40],
+          "description": "Fiber Uplink"
+        }
+      ]
+    },
+    "firewall": {
+      "config": {
+        "hostname": "FW-EDGE-01",
+        "managementIp": "10.0.2.1"
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "203.0.113.1",
+          "subnet": "255.255.255.248",
+          "description": "Outside Interface"
+        },
+        {
+          "name": "eth1",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "10.0.0.254",
+          "subnet": "255.255.255.0",
+          "description": "Inside Interface"
+        },
+        {
+          "name": "eth2",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "172.16.0.1",
+          "subnet": "255.255.255.0",
+          "description": "DMZ Interface"
+        }
+      ]
+    },
+    "server": {
+      "config": {
+        "hostname": "SRV-WEB-01",
+        "managementIp": "10.0.20.10"
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "10.0.20.10",
+          "subnet": "255.255.255.0",
+          "description": "Primary Network"
+        },
+        {
+          "name": "eth1",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "down",
+          "mode": "routed",
+          "description": "Backup Network"
+        }
+      ]
+    },
+    "workstation": {
+      "config": {
+        "hostname": "PC-USER-01"
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "192.168.1.100",
+          "subnet": "255.255.255.0",
+          "description": "LAN Connection"
+        }
+      ]
+    },
+    "access-point": {
+      "config": {
+        "hostname": "AP-WIFI-01",
+        "managementIp": "10.0.30.1"
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "type": "ethernet",
+          "speed": "1000",
+          "status": "up",
+          "mode": "trunk",
+          "vlans": [10, 30],
+          "description": "Uplink"
+        },
+        {
+          "name": "wlan0",
+          "type": "wireless",
+          "status": "up",
+          "mode": "access",
+          "vlans": [30],
+          "description": "Guest WiFi"
+        },
+        {
+          "name": "wlan1",
+          "type": "wireless",
+          "status": "up",
+          "mode": "access",
+          "vlans": [10],
+          "description": "Corporate WiFi"
+        }
+      ]
+    },
+    "load-balancer": {
+      "config": {
+        "hostname": "LB-MAIN-01",
+        "managementIp": "10.0.40.1"
+      },
+      "interfaces": [
+        {
+          "name": "eth0",
+          "type": "ethernet",
+          "speed": "10000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "10.0.40.1",
+          "subnet": "255.255.255.0",
+          "description": "Frontend"
+        },
+        {
+          "name": "eth1",
+          "type": "ethernet",
+          "speed": "10000",
+          "status": "up",
+          "mode": "routed",
+          "ipAddress": "10.0.41.1",
+          "subnet": "255.255.255.0",
+          "description": "Backend Pool"
+        }
+      ]
+    }
+  }
+}

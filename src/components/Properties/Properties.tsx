@@ -1,4 +1,8 @@
-import { Close as CloseIcon, ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
+import { 
+  Close as CloseIcon, 
+  ExpandMore as ExpandMoreIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
 import {
   Box,
   Paper,
@@ -16,14 +20,19 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Chip,
+  Tooltip,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useDiagramStore } from '../../store/diagramStore';
+import { determineLinkStatus, getConnectionStyleFromLinkStatus, determineInterfaceStatus } from '../../utils/linkStatusUtils';
 import { migrateDeviceToInterfaces } from '../../utils/migrationUtils';
+import DeviceConfigImport from './DeviceConfigImport';
 import InterfacesSection from './InterfacesSection';
 
 const Properties: React.FC = () => {
   const [expandedSection, setExpandedSection] = useState<string | false>('basic');
+  const [configImportOpen, setConfigImportOpen] = useState(false);
   const { 
     selectedDevice, 
     selectedConnection, 
@@ -119,9 +128,16 @@ const Properties: React.FC = () => {
         <Box sx={{ p: 2, pl: 5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Device Properties</Typography>
-            <IconButton size="small" onClick={() => selectDevice(null)}>
-              <CloseIcon />
-            </IconButton>
+            <Box>
+              <Tooltip title="Import/Export Configuration">
+                <IconButton size="small" onClick={() => setConfigImportOpen(true)}>
+                  <SettingsIcon />
+                </IconButton>
+              </Tooltip>
+              <IconButton size="small" onClick={() => selectDevice(null)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
           </Box>
           
           <TextField
@@ -233,31 +249,114 @@ const Properties: React.FC = () => {
                      (selectedConnection.sourcePort && connectionDevices?.source?.interfaces?.find(i => i.name === selectedConnection.sourcePort)?.id) || 
                      ''}
               onChange={(e) => {
-                const interfaceId = e.target.value;
-                const sourceInterface = connectionDevices?.source?.interfaces?.find(i => i.id === interfaceId);
-                const targetInterfaceId = selectedConnection.targetInterfaceId || 
-                  (selectedConnection.targetPort && connectionDevices?.target?.interfaces?.find(i => i.name === selectedConnection.targetPort)?.id);
-                const targetInterface = targetInterfaceId ? connectionDevices?.target?.interfaces?.find(i => i.id === targetInterfaceId) : null;
+                const newInterfaceId = e.target.value;
+                const oldInterfaceId = selectedConnection.sourceInterfaceId;
                 
-                // 両方のインターフェースが選択されている場合、接続タイプを自動設定
-                let connectionType = selectedConnection.type;
-                if (sourceInterface && targetInterface) {
-                  // 両方のインターフェースタイプが同じ場合はそのタイプを使用
-                  if (sourceInterface.type === targetInterface.type) {
-                    connectionType = sourceInterface.type;
+                // 最新のデバイス情報を取得
+                const currentSourceDevice = devices.find(d => d.id === selectedConnection.source);
+                const currentTargetDevice = devices.find(d => d.id === selectedConnection.target);
+                
+                // インターフェースが未選択になった場合、古いインターフェースのステータスをDownに戻す
+                if (!newInterfaceId && oldInterfaceId && currentSourceDevice) {
+                  const oldInterface = currentSourceDevice.interfaces?.find(i => i.id === oldInterfaceId);
+                  if (oldInterface && oldInterface.status !== 'admin-down') {
+                    const updatedSourceInterfaces = currentSourceDevice.interfaces.map(intf =>
+                      intf.id === oldInterfaceId ? { ...intf, status: 'down' as const } : intf
+                    );
+                    updateDevice(currentSourceDevice.id, { interfaces: updatedSourceInterfaces });
+                  }
+                }
+                // 別のインターフェースが選択された場合も、古いインターフェースのステータスをDownに戻す
+                else if (oldInterfaceId && oldInterfaceId !== newInterfaceId && currentSourceDevice) {
+                  const oldInterface = currentSourceDevice.interfaces?.find(i => i.id === oldInterfaceId);
+                  if (oldInterface && oldInterface.status !== 'admin-down') {
+                    const updatedSourceInterfaces = currentSourceDevice.interfaces.map(intf =>
+                      intf.id === oldInterfaceId ? { ...intf, status: 'down' as const } : intf
+                    );
+                    updateDevice(currentSourceDevice.id, { interfaces: updatedSourceInterfaces });
                   }
                 }
                 
-                updateConnection(selectedConnection.id, { 
-                  sourceInterfaceId: interfaceId,
-                  sourcePort: sourceInterface?.name || '', // 後方互換性のため
-                  type: connectionType
-                });
+                const sourceInterface = newInterfaceId ? currentSourceDevice?.interfaces?.find(i => i.id === newInterfaceId) : null;
+                const targetInterfaceId = selectedConnection.targetInterfaceId || 
+                  (selectedConnection.targetPort && currentTargetDevice?.interfaces?.find(i => i.name === selectedConnection.targetPort)?.id);
+                const targetInterface = targetInterfaceId ? currentTargetDevice?.interfaces?.find(i => i.id === targetInterfaceId) : null;
+                
+                // 両方のインターフェースが選択されているかチェック
+                const bothSelected = !!(newInterfaceId && targetInterfaceId);
+                
+                // 接続タイプを自動設定
+                let connectionType = selectedConnection.type;
+                if (sourceInterface && targetInterface && sourceInterface.type === targetInterface.type) {
+                  connectionType = sourceInterface.type;
+                }
+                
+                // ステータスとスタイルを更新
+                if (bothSelected && sourceInterface && targetInterface) {
+                  // インターフェースステータスを自動更新
+                  const sourceStatus = determineInterfaceStatus(sourceInterface, targetInterface, true);
+                  const targetStatus = determineInterfaceStatus(targetInterface, sourceInterface, true);
+                  
+                  // ソースデバイスのインターフェースを更新
+                  if (currentSourceDevice && sourceInterface.status !== 'admin-down') {
+                    const updatedSourceInterfaces = currentSourceDevice.interfaces.map(intf =>
+                      intf.id === newInterfaceId ? { ...intf, status: sourceStatus } : intf
+                    );
+                    updateDevice(currentSourceDevice.id, { interfaces: updatedSourceInterfaces });
+                  }
+                  
+                  // ターゲットデバイスのインターフェースを更新
+                  if (currentTargetDevice && targetInterface.status !== 'admin-down') {
+                    const updatedTargetInterfaces = currentTargetDevice.interfaces.map(intf =>
+                      intf.id === targetInterface.id ? { ...intf, status: targetStatus } : intf
+                    );
+                    updateDevice(currentTargetDevice.id, { interfaces: updatedTargetInterfaces });
+                  }
+                  
+                  // リンクステータスを判定してスタイルを自動更新
+                  const linkStatus = determineLinkStatus(
+                    { ...sourceInterface, status: sourceStatus },
+                    { ...targetInterface, status: targetStatus }
+                  );
+                  const autoStyle = getConnectionStyleFromLinkStatus(linkStatus, selectedConnection.style);
+                  
+                  updateConnection(selectedConnection.id, { 
+                    sourceInterfaceId: newInterfaceId,
+                    sourcePort: sourceInterface?.name || '',
+                    type: connectionType,
+                    style: autoStyle
+                  });
+                } else {
+                  // 片方または両方が未選択の場合
+                  // ターゲットのステータスもDownに戻す
+                  if (targetInterface && targetInterface.status !== 'admin-down' && currentTargetDevice) {
+                    const updatedTargetInterfaces = currentTargetDevice.interfaces.map(intf =>
+                      intf.id === targetInterfaceId ? { ...intf, status: 'down' as const } : intf
+                    );
+                    updateDevice(currentTargetDevice.id, { interfaces: updatedTargetInterfaces });
+                  }
+                  
+                  // リンクダウンスタイルを適用
+                  const linkStatus = { isUp: false, reason: 'Interface not selected' };
+                  const autoStyle = getConnectionStyleFromLinkStatus(linkStatus, selectedConnection.style);
+                  
+                  updateConnection(selectedConnection.id, { 
+                    sourceInterfaceId: newInterfaceId,
+                    sourcePort: sourceInterface?.name || '',
+                    type: connectionType,
+                    style: autoStyle
+                  });
+                }
               }}
               label="Source Interface"
             >
-              {connectionDevices?.source ? (
-                connectionDevices.source.interfaces?.map((iface) => (
+              <MenuItem value="">
+                <Typography variant="caption" color="text.secondary">(None)</Typography>
+              </MenuItem>
+              {(() => {
+                const sourceDevice = devices.find(d => d.id === selectedConnection.source);
+                return sourceDevice ? (
+                  sourceDevice.interfaces?.map((iface) => (
                   <MenuItem key={iface.id} value={iface.id}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography>{iface.name}</Typography>
@@ -266,12 +365,13 @@ const Properties: React.FC = () => {
                       </Typography>
                     </Box>
                   </MenuItem>
-                ))
-              ) : (
-                <MenuItem value="" disabled>
-                  <Typography variant="caption" color="text.secondary">No source device</Typography>
-                </MenuItem>
-              )}
+                  ))
+                ) : (
+                  <MenuItem value="" disabled>
+                    <Typography variant="caption" color="text.secondary">No source device</Typography>
+                  </MenuItem>
+                );
+              })()}
             </Select>
           </FormControl>
           
@@ -282,31 +382,114 @@ const Properties: React.FC = () => {
                      (selectedConnection.targetPort && connectionDevices?.target?.interfaces?.find(i => i.name === selectedConnection.targetPort)?.id) || 
                      ''}
               onChange={(e) => {
-                const interfaceId = e.target.value;
-                const targetInterface = connectionDevices?.target?.interfaces?.find(i => i.id === interfaceId);
-                const sourceInterfaceId = selectedConnection.sourceInterfaceId || 
-                  (selectedConnection.sourcePort && connectionDevices?.source?.interfaces?.find(i => i.name === selectedConnection.sourcePort)?.id);
-                const sourceInterface = sourceInterfaceId ? connectionDevices?.source?.interfaces?.find(i => i.id === sourceInterfaceId) : null;
+                const newInterfaceId = e.target.value;
+                const oldInterfaceId = selectedConnection.targetInterfaceId;
                 
-                // 両方のインターフェースが選択されている場合、接続タイプを自動設定
-                let connectionType = selectedConnection.type;
-                if (sourceInterface && targetInterface) {
-                  // 両方のインターフェースタイプが同じ場合はそのタイプを使用
-                  if (sourceInterface.type === targetInterface.type) {
-                    connectionType = targetInterface.type;
+                // 最新のデバイス情報を取得
+                const currentSourceDevice = devices.find(d => d.id === selectedConnection.source);
+                const currentTargetDevice = devices.find(d => d.id === selectedConnection.target);
+                
+                // インターフェースが未選択になった場合、古いインターフェースのステータスをDownに戻す
+                if (!newInterfaceId && oldInterfaceId && currentTargetDevice) {
+                  const oldInterface = currentTargetDevice.interfaces?.find(i => i.id === oldInterfaceId);
+                  if (oldInterface && oldInterface.status !== 'admin-down') {
+                    const updatedTargetInterfaces = currentTargetDevice.interfaces.map(intf =>
+                      intf.id === oldInterfaceId ? { ...intf, status: 'down' as const } : intf
+                    );
+                    updateDevice(currentTargetDevice.id, { interfaces: updatedTargetInterfaces });
+                  }
+                }
+                // 別のインターフェースが選択された場合も、古いインターフェースのステータスをDownに戻す
+                else if (oldInterfaceId && oldInterfaceId !== newInterfaceId && currentTargetDevice) {
+                  const oldInterface = currentTargetDevice.interfaces?.find(i => i.id === oldInterfaceId);
+                  if (oldInterface && oldInterface.status !== 'admin-down') {
+                    const updatedTargetInterfaces = currentTargetDevice.interfaces.map(intf =>
+                      intf.id === oldInterfaceId ? { ...intf, status: 'down' as const } : intf
+                    );
+                    updateDevice(currentTargetDevice.id, { interfaces: updatedTargetInterfaces });
                   }
                 }
                 
-                updateConnection(selectedConnection.id, { 
-                  targetInterfaceId: interfaceId,
-                  targetPort: targetInterface?.name || '', // 後方互換性のため
-                  type: connectionType
-                });
+                const targetInterface = newInterfaceId ? currentTargetDevice?.interfaces?.find(i => i.id === newInterfaceId) : null;
+                const sourceInterfaceId = selectedConnection.sourceInterfaceId || 
+                  (selectedConnection.sourcePort && currentSourceDevice?.interfaces?.find(i => i.name === selectedConnection.sourcePort)?.id);
+                const sourceInterface = sourceInterfaceId ? currentSourceDevice?.interfaces?.find(i => i.id === sourceInterfaceId) : null;
+                
+                // 両方のインターフェースが選択されているかチェック
+                const bothSelected = !!(newInterfaceId && sourceInterfaceId);
+                
+                // 接続タイプを自動設定
+                let connectionType = selectedConnection.type;
+                if (sourceInterface && targetInterface && sourceInterface.type === targetInterface.type) {
+                  connectionType = targetInterface.type;
+                }
+                
+                // ステータスとスタイルを更新
+                if (bothSelected && sourceInterface && targetInterface) {
+                  // インターフェースステータスを自動更新（Admin Downでない限り）
+                  const sourceStatus = determineInterfaceStatus(sourceInterface, targetInterface, true);
+                  const targetStatus = determineInterfaceStatus(targetInterface, sourceInterface, true);
+                  
+                  // ソースデバイスのインターフェースを更新
+                  if (currentSourceDevice && sourceInterface.status !== 'admin-down') {
+                    const updatedSourceInterfaces = currentSourceDevice.interfaces.map(intf =>
+                      intf.id === sourceInterface.id ? { ...intf, status: sourceStatus } : intf
+                    );
+                    updateDevice(currentSourceDevice.id, { interfaces: updatedSourceInterfaces });
+                  }
+                  
+                  // ターゲットデバイスのインターフェースを更新
+                  if (currentTargetDevice && targetInterface.status !== 'admin-down') {
+                    const updatedTargetInterfaces = currentTargetDevice.interfaces.map(intf =>
+                      intf.id === newInterfaceId ? { ...intf, status: targetStatus } : intf
+                    );
+                    updateDevice(currentTargetDevice.id, { interfaces: updatedTargetInterfaces });
+                  }
+                  
+                  // リンクステータスを判定してスタイルを自動更新
+                  const linkStatus = determineLinkStatus(
+                    { ...sourceInterface, status: sourceStatus },
+                    { ...targetInterface, status: targetStatus }
+                  );
+                  const autoStyle = getConnectionStyleFromLinkStatus(linkStatus, selectedConnection.style);
+                  
+                  updateConnection(selectedConnection.id, { 
+                    targetInterfaceId: newInterfaceId,
+                    targetPort: targetInterface?.name || '',
+                    type: connectionType,
+                    style: autoStyle
+                  });
+                } else {
+                  // 片方または両方が未選択の場合
+                  // ソースのステータスもDownに戻す
+                  if (sourceInterface && sourceInterface.status !== 'admin-down' && currentSourceDevice) {
+                    const updatedSourceInterfaces = currentSourceDevice.interfaces.map(intf =>
+                      intf.id === sourceInterfaceId ? { ...intf, status: 'down' as const } : intf
+                    );
+                    updateDevice(currentSourceDevice.id, { interfaces: updatedSourceInterfaces });
+                  }
+                  
+                  // リンクダウンスタイルを適用
+                  const linkStatus = { isUp: false, reason: 'Interface not selected' };
+                  const autoStyle = getConnectionStyleFromLinkStatus(linkStatus, selectedConnection.style);
+                  
+                  updateConnection(selectedConnection.id, { 
+                    targetInterfaceId: newInterfaceId,
+                    targetPort: targetInterface?.name || '',
+                    type: connectionType,
+                    style: autoStyle
+                  });
+                }
               }}
               label="Target Interface"
             >
-              {connectionDevices?.target ? (
-                connectionDevices.target.interfaces?.map((iface) => (
+              <MenuItem value="">
+                <Typography variant="caption" color="text.secondary">(None)</Typography>
+              </MenuItem>
+              {(() => {
+                const targetDevice = devices.find(d => d.id === selectedConnection.target);
+                return targetDevice ? (
+                  targetDevice.interfaces?.map((iface) => (
                   <MenuItem key={iface.id} value={iface.id}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Typography>{iface.name}</Typography>
@@ -315,12 +498,13 @@ const Properties: React.FC = () => {
                       </Typography>
                     </Box>
                   </MenuItem>
-                ))
-              ) : (
-                <MenuItem value="" disabled>
-                  <Typography variant="caption" color="text.secondary">No target device</Typography>
-                </MenuItem>
-              )}
+                  ))
+                ) : (
+                  <MenuItem value="" disabled>
+                    <Typography variant="caption" color="text.secondary">No target device</Typography>
+                  </MenuItem>
+                );
+              })()}
             </Select>
           </FormControl>
           
@@ -346,6 +530,40 @@ const Properties: React.FC = () => {
           />
           
           <Divider sx={{ my: 2 }} />
+          
+          {/* リンクステータス表示 */}
+          {(() => {
+            const sourceInterfaceId = selectedConnection.sourceInterfaceId || 
+              (selectedConnection.sourcePort && connectionDevices?.source?.interfaces?.find(i => i.name === selectedConnection.sourcePort)?.id);
+            const targetInterfaceId = selectedConnection.targetInterfaceId || 
+              (selectedConnection.targetPort && connectionDevices?.target?.interfaces?.find(i => i.name === selectedConnection.targetPort)?.id);
+            
+            if (sourceInterfaceId && targetInterfaceId) {
+              const sourceInterface = connectionDevices?.source?.interfaces?.find(i => i.id === sourceInterfaceId);
+              const targetInterface = connectionDevices?.target?.interfaces?.find(i => i.id === targetInterfaceId);
+              const linkStatus = determineLinkStatus(sourceInterface, targetInterface);
+              
+              return (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Link Status
+                  </Typography>
+                  <Chip
+                    label={linkStatus.isUp ? 'Link Up' : 'Link Down'}
+                    color={linkStatus.isUp ? 'success' : 'error'}
+                    size="small"
+                    sx={{ mb: 1 }}
+                  />
+                  {!linkStatus.isUp && linkStatus.reason && (
+                    <Typography variant="caption" display="block" color="text.secondary">
+                      Reason: {linkStatus.reason}
+                    </Typography>
+                  )}
+                </Box>
+              );
+            }
+            return null;
+          })()}
           
           <Typography variant="subtitle2" gutterBottom>
             Connection Style
@@ -446,6 +664,12 @@ const Properties: React.FC = () => {
           </Button>
         </Box>
       )}
+      
+      {/* Configuration Import Dialog */}
+      <DeviceConfigImport
+        open={configImportOpen}
+        onClose={() => setConfigImportOpen(false)}
+      />
     </Paper>
   );
 };
