@@ -10,6 +10,9 @@ import {
   Code as JSONIcon,
   Dashboard as TemplatesIcon,
   AutoFixHigh as AutoLayoutIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  Draw as DrawIcon,
 } from '@mui/icons-material';
 import {
   AppBar,
@@ -44,7 +47,25 @@ interface NotificationState {
 }
 
 const Toolbar: React.FC = () => {
-  const { layer, setLayer, clearDiagram, devices, connections, undo, redo, canUndo, canRedo, gridEnabled, toggleGrid } = useDiagramStore();
+  const { 
+    layer, 
+    setLayer, 
+    clearDiagram, 
+    devices, 
+    connections, 
+    annotations,
+    drawings,
+    undo, 
+    redo, 
+    canUndo, 
+    canRedo, 
+    gridEnabled, 
+    toggleGrid,
+    showAnnotations,
+    toggleAnnotations,
+    isDrawingMode,
+    toggleDrawingMode,
+  } = useDiagramStore();
   const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [autoLayoutOpen, setAutoLayoutOpen] = useState(false);
@@ -109,7 +130,7 @@ const Toolbar: React.FC = () => {
   const handleExportJSON = () => {
     setIsExporting(true);
     try {
-      exportToJSON(devices, connections);
+      exportToJSON(devices, connections, annotations, drawings);
       showNotification('JSON export completed successfully!', 'success');
     } catch (error) {
       console.error('Export to JSON failed:', error);
@@ -130,7 +151,7 @@ const Toolbar: React.FC = () => {
 
   const handleSave = () => {
     try {
-      exportToJSON(devices, connections, 'network-diagram-save.json');
+      exportToJSON(devices, connections, annotations, drawings, 'network-diagram-save.json');
       showNotification('Diagram saved successfully!', 'success');
     } catch (error) {
       console.error('Save failed:', error);
@@ -182,10 +203,19 @@ const Toolbar: React.FC = () => {
                 groups: data.groups || [],
                 layer: data.layer || 'L3' as const,
                 createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
-                updatedAt: new Date()
+                updatedAt: new Date(),
+                annotations: data.annotations || [],
+                drawings: data.drawings || []
               };
               loadDiagram(diagram);
-              showNotification(`Successfully loaded ${data.devices.length} devices and ${data.connections.length} connections`, 'success');
+              
+              const annotationCount = data.annotations?.length || 0;
+              const drawingCount = data.drawings?.length || 0;
+              let message = `Successfully loaded ${data.devices.length} devices and ${data.connections.length} connections`;
+              if (annotationCount > 0 || drawingCount > 0) {
+                message += `, ${annotationCount} annotations, ${drawingCount} drawings`;
+              }
+              showNotification(message, 'success');
             } catch (error) {
               console.error('Failed to load file:', error);
               showNotification(
@@ -292,6 +322,20 @@ const Toolbar: React.FC = () => {
               L3
             </Button>
           </ButtonGroup>
+
+          <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+
+          <Tooltip title={showAnnotations ? "Hide Annotations" : "Show Annotations"}>
+            <IconButton onClick={toggleAnnotations} color={showAnnotations ? "primary" : "default"}>
+              {showAnnotations ? <VisibilityIcon /> : <VisibilityOffIcon />}
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title={isDrawingMode ? "Exit Drawing Mode" : "Enter Drawing Mode"}>
+            <IconButton onClick={toggleDrawingMode} color={isDrawingMode ? "primary" : "default"}>
+              <DrawIcon />
+            </IconButton>
+          </Tooltip>
 
           <Box sx={{ flex: 1 }} />
 

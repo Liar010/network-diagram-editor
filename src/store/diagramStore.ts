@@ -6,6 +6,7 @@ import { generateId } from '../utils/idGenerator';
 import { applyLayout, LayoutOptions } from '../utils/layoutUtils';
 import { determineLinkStatus, getConnectionStyleFromLinkStatus, determineInterfaceStatus } from '../utils/linkStatusUtils';
 import { migrateDeviceToInterfaces, migrateConnectionToInterfaceIds } from '../utils/migrationUtils';
+import { StructuredAnnotation, FreehandDrawing, DrawingTool } from '../types/annotation';
 
 interface DiagramState {
   currentDiagram: NetworkDiagram | null;
@@ -23,6 +24,20 @@ interface DiagramState {
   gridEnabled: boolean;
   gridSize: number;
   reactFlowInstance: any | null;
+  
+  // Annotations
+  annotations: StructuredAnnotation[];
+  selectedAnnotation: StructuredAnnotation | null;
+  showAnnotations: boolean;
+  
+  // Drawings
+  drawings: FreehandDrawing[];
+  selectedDrawing: FreehandDrawing | null;
+  isDrawingMode: boolean;
+  drawingTool: DrawingTool | null;
+  currentDrawing: FreehandDrawing | null;
+  showDrawings: boolean;
+  drawingStyle: Partial<{ stroke: string; strokeWidth: number; strokeOpacity: number }> | null;
   
   addDevice: (device: Omit<NetworkDevice, 'id'>) => void;
   updateDevice: (id: string, device: Partial<NetworkDevice>) => void;
@@ -71,6 +86,25 @@ interface DiagramState {
   
   // React Flow instance
   setReactFlowInstance: (instance: any) => void;
+  
+  // Annotation actions
+  addAnnotation: (annotation: Omit<StructuredAnnotation, 'id'>) => void;
+  updateAnnotation: (id: string, annotation: Partial<StructuredAnnotation>) => void;
+  deleteAnnotation: (id: string) => void;
+  selectAnnotation: (annotation: StructuredAnnotation | null) => void;
+  toggleAnnotations: () => void;
+  
+  // Drawing actions
+  startDrawing: (tool: DrawingTool, point: { x: number; y: number }) => void;
+  addDrawingPoint: (point: { x: number; y: number }) => void;
+  finishDrawing: () => void;
+  deleteDrawing: (id: string) => void;
+  selectDrawing: (drawing: FreehandDrawing | null) => void;
+  clearDrawings: () => void;
+  toggleDrawingMode: () => void;
+  setDrawingTool: (tool: DrawingTool | null) => void;
+  toggleDrawings: () => void;
+  setDrawingStyle: (style: Partial<{ stroke: string; strokeWidth: number; strokeOpacity: number }>) => void;
 }
 
 export const useDiagramStore = create<DiagramState>((set, get) => ({
@@ -93,6 +127,20 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
   gridEnabled: true,
   gridSize: 20,
   reactFlowInstance: null,
+  
+  // Annotation state
+  annotations: [],
+  selectedAnnotation: null,
+  showAnnotations: true,
+  
+  // Drawing state
+  drawings: [],
+  selectedDrawing: null,
+  isDrawingMode: false,
+  drawingTool: null,
+  currentDrawing: null,
+  showDrawings: true,
+  drawingStyle: null,
   
   addDevice: (device) => set((state) => {
     const newDevice: NetworkDevice = {
@@ -341,6 +389,10 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
     selectedDevices: [],
     selectedConnections: [],
     selectedGroup: null,
+    annotations: [],
+    selectedAnnotation: null,
+    drawings: [],
+    currentDrawing: null,
   }),
   
   loadDiagram: (diagram) => set((state) => {
@@ -367,6 +419,10 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
       selectedDevices: [],
       selectedConnections: [],
       selectedGroup: null,
+      annotations: diagram.annotations || [],
+      selectedAnnotation: null,
+      drawings: diagram.drawings || [],
+      currentDrawing: null,
     };
   }),
   
@@ -604,4 +660,104 @@ export const useDiagramStore = create<DiagramState>((set, get) => ({
   
   // React Flow instance
   setReactFlowInstance: (instance) => set({ reactFlowInstance: instance }),
+  
+  // Annotation actions
+  addAnnotation: (annotation) => set((state) => {
+    const newAnnotation: StructuredAnnotation = {
+      ...annotation,
+      id: generateId('annotation'),
+    };
+    return {
+      annotations: [...state.annotations, newAnnotation],
+    };
+  }),
+  
+  updateAnnotation: (id, annotation) => set((state) => ({
+    annotations: state.annotations.map((a) => 
+      a.id === id ? { ...a, ...annotation } : a
+    ),
+  })),
+  
+  deleteAnnotation: (id) => set((state) => ({
+    annotations: state.annotations.filter((a) => a.id !== id),
+    selectedAnnotation: state.selectedAnnotation?.id === id ? null : state.selectedAnnotation,
+  })),
+  
+  selectAnnotation: (annotation) => set({ 
+    selectedAnnotation: annotation,
+    selectedDevice: null,
+    selectedConnection: null,
+  }),
+  
+  toggleAnnotations: () => set((state) => ({ 
+    showAnnotations: !state.showAnnotations 
+  })),
+  
+  // Drawing actions
+  startDrawing: (tool, point) => set((state) => {
+    const newDrawing: FreehandDrawing = {
+      id: generateId('drawing'),
+      type: tool === 'rectangle' ? 'rectangle' : tool === 'highlighter' ? 'highlighter' : 'pen',
+      points: [point],
+      style: {
+        stroke: state.drawingStyle?.stroke || (tool === 'highlighter' ? '#ffeb3b' : '#000000'),
+        strokeWidth: state.drawingStyle?.strokeWidth || (tool === 'highlighter' ? 15 : 2),
+        strokeOpacity: state.drawingStyle?.strokeOpacity || (tool === 'highlighter' ? 0.3 : 1),
+      },
+    };
+    return {
+      currentDrawing: newDrawing,
+      isDrawingMode: true,
+      drawingTool: tool,
+    };
+  }),
+  
+  addDrawingPoint: (point) => set((state) => {
+    if (!state.currentDrawing) return state;
+    return {
+      currentDrawing: {
+        ...state.currentDrawing,
+        points: [...state.currentDrawing.points, point],
+      },
+    };
+  }),
+  
+  finishDrawing: () => set((state) => {
+    if (!state.currentDrawing || state.currentDrawing.points.length < 2) {
+      return { currentDrawing: null };
+    }
+    return {
+      drawings: [...state.drawings, state.currentDrawing],
+      currentDrawing: null,
+    };
+  }),
+  
+  deleteDrawing: (id) => set((state) => ({
+    drawings: state.drawings.filter((d) => d.id !== id),
+    selectedDrawing: state.selectedDrawing?.id === id ? null : state.selectedDrawing,
+  })),
+  
+  selectDrawing: (drawing) => set({ 
+    selectedDrawing: drawing,
+    selectedAnnotation: null,
+    selectedDevice: null,
+    selectedConnection: null,
+  }),
+  
+  clearDrawings: () => set({ drawings: [], selectedDrawing: null }),
+  
+  toggleDrawingMode: () => set((state) => ({ 
+    isDrawingMode: !state.isDrawingMode,
+    drawingTool: !state.isDrawingMode ? 'pen' : null,
+  })),
+  
+  setDrawingTool: (tool) => set({ drawingTool: tool }),
+  
+  toggleDrawings: () => set((state) => ({ 
+    showDrawings: !state.showDrawings 
+  })),
+  
+  setDrawingStyle: (style) => set((state) => ({
+    drawingStyle: { ...state.drawingStyle, ...style }
+  })),
 }));

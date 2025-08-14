@@ -314,7 +314,13 @@ export const exportToCSV = (devices: NetworkDevice[], connections: Connection[])
   }
 };
 
-export const exportToJSON = (devices: NetworkDevice[], connections: Connection[], filename: string = 'network-diagram.json') => {
+export const exportToJSON = (
+  devices: NetworkDevice[], 
+  connections: Connection[], 
+  annotations: any[] = [], 
+  drawings: any[] = [], 
+  filename: string = 'network-diagram.json'
+) => {
   try {
     if (!Array.isArray(devices) || !Array.isArray(connections)) {
       throw new Error('Invalid data: devices and connections must be arrays');
@@ -328,10 +334,12 @@ export const exportToJSON = (devices: NetworkDevice[], connections: Connection[]
 
     // Create export data with metadata
     const data = {
-      version: '1.0',
+      version: '1.1',
       exportedAt: new Date().toISOString(),
       deviceCount: devices.length,
       connectionCount: connections.length,
+      annotationCount: annotations.length,
+      drawingCount: drawings.length,
       devices: devices.map(device => ({
         ...device,
         // Ensure required fields are present
@@ -351,7 +359,9 @@ export const exportToJSON = (devices: NetworkDevice[], connections: Connection[]
         source: connection.source || '',
         target: connection.target || '',
         type: connection.type || 'ethernet'
-      }))
+      })),
+      annotations: annotations,
+      drawings: drawings
     };
 
     // Validate JSON serialization

@@ -35,13 +35,17 @@ const Properties: React.FC = () => {
   const [configImportOpen, setConfigImportOpen] = useState(false);
   const { 
     selectedDevice, 
-    selectedConnection, 
+    selectedConnection,
+    selectedAnnotation, 
     updateDevice, 
     updateConnection,
+    updateAnnotation,
     selectDevice, 
     selectConnection,
+    selectAnnotation,
     deleteDevice,
     deleteConnection,
+    deleteAnnotation,
     devices
   } = useDiagramStore();
 
@@ -77,7 +81,7 @@ const Properties: React.FC = () => {
     };
   }, [devices, selectedConnection]);
 
-  if (!currentDevice && !selectedConnection) {
+  if (!currentDevice && !selectedConnection && !selectedAnnotation) {
     return (
       <Paper
         elevation={2}
@@ -113,6 +117,133 @@ const Properties: React.FC = () => {
       updateDevice(currentDevice.id, { name: value });
     }
   };
+
+  // Annotation properties
+  if (selectedAnnotation) {
+    return (
+      <Paper
+        elevation={2}
+        sx={{
+          width: '100%',
+          height: '100%',
+          overflow: 'auto',
+          backgroundColor: 'background.paper',
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="h6">Annotation Properties</Typography>
+            <IconButton
+              size="small"
+              onClick={() => {
+                deleteAnnotation(selectedAnnotation.id);
+                selectAnnotation(null);
+              }}
+              color="error"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          <TextField
+            fullWidth
+            label="Content"
+            multiline
+            rows={4}
+            value={selectedAnnotation.content || ''}
+            onChange={(e) => updateAnnotation(selectedAnnotation.id, { content: e.target.value })}
+            margin="normal"
+            size="small"
+          />
+          
+          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Style</Typography>
+          
+          <TextField
+            fullWidth
+            label="Background Color"
+            value={selectedAnnotation.style?.backgroundColor || '#ffffff'}
+            onChange={(e) => updateAnnotation(selectedAnnotation.id, {
+              style: { ...selectedAnnotation.style, backgroundColor: e.target.value }
+            })}
+            margin="normal"
+            size="small"
+            type="color"
+          />
+          
+          
+          <TextField
+            fullWidth
+            label="Font Size"
+            type="number"
+            value={selectedAnnotation.style?.fontSize || 14}
+            onChange={(e) => updateAnnotation(selectedAnnotation.id, {
+              style: { ...selectedAnnotation.style, fontSize: parseInt(e.target.value) || 14 }
+            })}
+            margin="normal"
+            size="small"
+            inputProps={{ min: 10, max: 32 }}
+          />
+          
+          <TextField
+            fullWidth
+            label="Text Color"
+            value={selectedAnnotation.style?.fontColor || '#333333'}
+            onChange={(e) => updateAnnotation(selectedAnnotation.id, {
+              style: { ...selectedAnnotation.style, fontColor: e.target.value }
+            })}
+            margin="normal"
+            size="small"
+            type="color"
+          />
+          
+          <TextField
+            fullWidth
+            label="Opacity"
+            type="number"
+            value={selectedAnnotation.style?.opacity || 1}
+            onChange={(e) => updateAnnotation(selectedAnnotation.id, {
+              style: { ...selectedAnnotation.style, opacity: parseFloat(e.target.value) || 1 }
+            })}
+            margin="normal"
+            size="small"
+            inputProps={{ min: 0, max: 1, step: 0.1 }}
+          />
+          
+          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Size</Typography>
+          
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <TextField
+              label="Width"
+              type="number"
+              value={selectedAnnotation.size?.width || 200}
+              onChange={(e) => updateAnnotation(selectedAnnotation.id, {
+                size: { 
+                  width: parseInt(e.target.value) || 200,
+                  height: selectedAnnotation.size?.height || 100
+                }
+              })}
+              size="small"
+              inputProps={{ min: 50, max: 800 }}
+            />
+            
+            <TextField
+              label="Height"
+              type="number"
+              value={selectedAnnotation.size?.height || 100}
+              onChange={(e) => updateAnnotation(selectedAnnotation.id, {
+                size: { 
+                  width: selectedAnnotation.size?.width || 200,
+                  height: parseInt(e.target.value) || 100
+                }
+              })}
+              size="small"
+              inputProps={{ min: 50, max: 600 }}
+            />
+          </Box>
+        </Box>
+      </Paper>
+    );
+  }
 
   return (
     <Paper

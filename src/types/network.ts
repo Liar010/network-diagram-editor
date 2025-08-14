@@ -87,4 +87,6 @@ export interface NetworkDiagram {
   layer: 'L1' | 'L2' | 'L3';
   createdAt: Date;
   updatedAt: Date;
+  annotations?: any[]; // StructuredAnnotation型
+  drawings?: any[]; // FreehandDrawing型
 }

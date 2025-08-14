@@ -19,11 +19,31 @@ import { NetworkNode, NetworkEdge } from '../../types/reactflow';
 import { snapToGrid } from '../../utils/gridUtils';
 import { getConnectionDisplayInfo, getConnectionStyleForLayer } from '../../utils/layerUtils';
 import { createDeviceWithInterfaces } from '../../utils/migrationUtils';
+import { AnnotationType } from '../../types/annotation';
 import MemoizedNetworkDeviceNode from './MemoizedNetworkDeviceNode';
+import AnnotationNode from './AnnotationNode';
+import SelectableDrawingPanel from './SelectableDrawingPanel';
+import DrawingToolbar from './DrawingToolbar';
 
 const Canvas: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { devices, connections, addDevice, addConnection, updateDevice, selectConnection, layer, gridEnabled, gridSize, setReactFlowInstance } = useDiagramStore();
+  const { 
+    devices, 
+    connections, 
+    addDevice, 
+    addConnection, 
+    updateDevice, 
+    selectConnection, 
+    layer, 
+    gridEnabled, 
+    gridSize, 
+    setReactFlowInstance,
+    annotations,
+    showAnnotations,
+    addAnnotation,
+    isDrawingMode,
+    showDrawings,
+  } = useDiagramStore();
   const [nodes, setNodes, onNodesChange] = useNodesState<NetworkNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<NetworkEdge>([]);
   const [reactFlowInstance, setReactFlowInstanceLocal] = React.useState<ReactFlowInstance<NetworkNode, NetworkEdge> | null>(null);
@@ -31,17 +51,32 @@ const Canvas: React.FC = () => {
   // Memoize node types to prevent unnecessary re-renders
   const nodeTypes = useMemo(() => ({
     networkDevice: MemoizedNetworkDeviceNode,
+    annotation: AnnotationNode as any,
   }), []);
 
   React.useEffect(() => {
-    const flowNodes: NetworkNode[] = devices.map((device) => ({
+    const deviceNodes: any[] = devices.map((device) => ({
       id: device.id,
       type: 'networkDevice',
       position: device.position,
       data: { device },
     }));
-    setNodes(flowNodes);
-  }, [devices, setNodes]);
+    
+    const annotationNodes: any[] = showAnnotations 
+      ? annotations.map((annotation) => ({
+          id: `annotation-${annotation.id}`,
+          type: 'annotation',
+          position: annotation.position,
+          data: { annotation },
+          draggable: !isDrawingMode,
+          selectable: !isDrawingMode,
+          zIndex: annotation.style?.zIndex || -1,
+        }))
+      : [];
+    
+    const allNodes = [...deviceNodes, ...annotationNodes];
+    setNodes(allNodes);
+  }, [devices, annotations, showAnnotations, isDrawingMode, setNodes]);
 
   React.useEffect(() => {
     const flowEdges: NetworkEdge[] = connections.map((conn) => {
@@ -90,7 +125,7 @@ const Canvas: React.FC = () => {
     [addConnection]
   );
 
-  const [{ isOver }, drop] = useDrop(() => ({
+  const [{ isOver: isOverDevice }, dropDevice] = useDrop(() => ({
     accept: 'network-device',
     drop: (item: { type: DeviceType; label: string }, monitor) => {
       const clientOffset = monitor.getClientOffset();
@@ -119,6 +154,51 @@ const Canvas: React.FC = () => {
       isOver: !!monitor.isOver(),
     }),
   }), [addDevice, devices.length, reactFlowInstance]);
+  
+  const [{ isOver: isOverAnnotation }, dropAnnotation] = useDrop(() => ({
+    accept: 'annotation',
+    drop: (item: { type: AnnotationType }, monitor) => {
+      const clientOffset = monitor.getClientOffset();
+      if (clientOffset && reactFlowWrapper.current && reactFlowInstance) {
+        const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+        let position = reactFlowInstance.screenToFlowPosition({
+          x: clientOffset.x - reactFlowBounds.left,
+          y: clientOffset.y - reactFlowBounds.top,
+        });
+        
+        // Apply grid snap if enabled
+        if (gridEnabled) {
+          position = snapToGrid(position, gridSize);
+        }
+
+        const defaultSizes = {
+          'text-note': { width: 200, height: 100 },
+          'sticky': { width: 200, height: 150 },
+        };
+
+        addAnnotation({
+          type: item.type,
+          position,
+          content: '',
+          size: defaultSizes[item.type],
+          style: {
+            backgroundColor: item.type === 'sticky' ? '#ffeb3b' : '#fffbf0',
+            zIndex: 0,
+          },
+        });
+      }
+    },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  }), [addAnnotation, reactFlowInstance, gridEnabled, gridSize]);
+  
+  // Combine drop refs
+  const combinedDropRef = useCallback((node: HTMLDivElement) => {
+    dropDevice(node);
+    dropAnnotation(node);
+    reactFlowWrapper.current = node;
+  }, [dropDevice, dropAnnotation]);
 
   const onNodeDragStop = useCallback(
     (event: React.MouseEvent, node: any) => {
@@ -129,7 +209,14 @@ const Canvas: React.FC = () => {
         position = snapToGrid(position, gridSize);
       }
       
-      updateDevice(node.id, { position });
+      // Check if it's an annotation node
+      if (node.id.startsWith('annotation-')) {
+        const annotationId = node.id.replace('annotation-', '');
+        const { updateAnnotation } = useDiagramStore.getState();
+        updateAnnotation(annotationId, { position });
+      } else {
+        updateDevice(node.id, { position });
+      }
     },
     [updateDevice, gridEnabled, gridSize]
   );
@@ -144,18 +231,28 @@ const Canvas: React.FC = () => {
     [connections, selectConnection]
   );
 
+  const onNodeClick = useCallback(
+    (event: React.MouseEvent, node: any) => {
+      // Handle annotation node selection
+      if (node.id.startsWith('annotation-')) {
+        const annotationId = node.id.replace('annotation-', '');
+        const annotation = annotations.find(a => a.id === annotationId);
+        if (annotation) {
+          const { selectAnnotation } = useDiagramStore.getState();
+          selectAnnotation(annotation);
+        }
+      }
+    },
+    [annotations]
+  );
+
   return (
     <Box
-      ref={(el: HTMLDivElement | null) => {
-        drop(el);
-        if (el) {
-          reactFlowWrapper.current = el;
-        }
-      }}
+      ref={combinedDropRef}
       sx={{
         width: '100%',
         height: '100%',
-        backgroundColor: isOver ? 'action.hover' : 'background.default',
+        backgroundColor: (isOverDevice || isOverAnnotation) ? 'action.hover' : 'background.default',
       }}
     >
         <ReactFlow
@@ -174,6 +271,7 @@ const Canvas: React.FC = () => {
             }, 100);
           }}
           onNodeDragStop={onNodeDragStop}
+          onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}
           fitView
@@ -190,7 +288,9 @@ const Canvas: React.FC = () => {
             gap={gridSize} 
             size={1} 
           />
+          <SelectableDrawingPanel />
         </ReactFlow>
+        {isDrawingMode && <DrawingToolbar />}
     </Box>
   );
 };
